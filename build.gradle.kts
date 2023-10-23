@@ -90,14 +90,16 @@ tasks.withType<JavaCompile> {
 }
 
 // for publishing in jitpack
-subprojects {
-    publishing {
-        publications {
-            create<MavenPublication>("maven") {
-                from(components["java"])
-            }
-        }
+publishing {
+  publications {
+    create<MavenPublication>("maven") {
+      groupId = "com.github.deathgod7"
+      artifactId = "SE7ENLib"
+      version = "1.0.0"
+
+      from(components["java"])
     }
+  }
 }
 
 tasks.withType<JavaCompile>().configureEach {
