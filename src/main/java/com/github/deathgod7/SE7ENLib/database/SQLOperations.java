@@ -38,12 +38,12 @@ public abstract class SQLOperations implements DatabaseOperations {
 		// primary key columns
 		query.append("`").append(table.getPrimaryKey().getName()).append("` ");
 		query.append(Table.getInputDataType(table.getPrimaryKey().getDataType()));
-		query.append(" PRIMARY KEY ");
-		if (dbtype == DatabaseType.SQLite) {
-			query.append("AUTOINCREMENT");
+		query.append(" PRIMARY KEY");
+		if (dbtype == DatabaseType.SQLite && table.getPrimaryKey().isAutoIncrement()) {
+			query.append(" AUTOINCREMENT");
 		}
-		else if (dbtype == DatabaseType.MySQL) {
-			query.append("AUTO_INCREMENT");
+		else if (dbtype == DatabaseType.MySQL && table.getPrimaryKey().isAutoIncrement()) {
+			query.append(" AUTO_INCREMENT");
 		}
 		query.append(", ");
 		// remaining columns
@@ -252,7 +252,9 @@ public abstract class SQLOperations implements DatabaseOperations {
 		} else {
 			query.append(primaryKey.getValue().toString());
 		}
+		query.append(";");
 
+		System.out.println(query);
 		try {
 			PreparedStatement s = DatabaseManager.getInstance().getConnection().prepareStatement(query.toString());
 			s.executeUpdate();
@@ -354,7 +356,12 @@ public abstract class SQLOperations implements DatabaseOperations {
 	public List<Column> getExactData(String tablename, Column primaryKey) {
 		List<Column> result = new ArrayList<>();
 		Table table = DatabaseManager.getInstance().getTables().get(tablename);
-		String query = "SELECT * FROM " + tablename + " WHERE `" + primaryKey.getName() + "` = ?";
+		String query = "SELECT * FROM " + tablename + " WHERE `" + primaryKey.getName() + "` = ?;";
+
+		// float being weird
+		if (primaryKey.getDataType() == DataType.FLOAT) {
+			query = query.replace("= ?", "LIKE ?");
+		}
 
 		try {
 			PreparedStatement s = DatabaseManager.getInstance().getConnection().prepareStatement(query);
@@ -420,16 +427,23 @@ public abstract class SQLOperations implements DatabaseOperations {
 			}
 
 			ResultSet rs = s.executeQuery();
+			// System.out.println(s.toString());
+
+			// primary key and so on
+			List<Column> allTableCols = table.getColumns();
+			allTableCols.add(0, table.getPrimaryKey());
 
 			// if there is result found then proceed
 			if (rs.next()) {
 				try {
-					for (int i = 0; i < table.getColumns().size(); i++) {
+					for (int i = 0; i < allTableCols.size(); i++) {
 						// for each column in the row
-						Column rCol = new Column(table.getColumns().get(i).getName(),
-								table.getColumns().get(i).getDataType(),
-								table.getColumns().get(i).getLimit()
+						Column rCol = new Column(allTableCols.get(i).getName(),
+								allTableCols.get(i).getDataType(),
+								allTableCols.get(i).getLimit()
 						);
+
+						// System.out.println(rCol.getName() + " = " + rs.getString(i+1));
 
 						switch (rCol.getDataType()) {
 							case VARCHAR:
@@ -484,7 +498,12 @@ public abstract class SQLOperations implements DatabaseOperations {
 	public List<List<Column>> findData(String tablename, Column column) {
 		List<List<Column>> results = new ArrayList<>();
 		Table table = DatabaseManager.getInstance().getTables().get(tablename);
-		String query = "SELECT * FROM " + tablename + " WHERE `" + column.getName() + "` = ?";
+		String query = "SELECT * FROM " + tablename + " WHERE `" + column.getName() + "` = ?;";
+
+		// float being weird
+		if (column.getDataType() == DataType.FLOAT) {
+			query = query.replace("= ?", "LIKE ?");
+		}
 
 		try {
 			PreparedStatement s = DatabaseManager.getInstance().getConnection().prepareStatement(query);
@@ -550,14 +569,22 @@ public abstract class SQLOperations implements DatabaseOperations {
 			}
 
 			ResultSet rs = s.executeQuery();
+			// System.out.println(s.toString());
+
+			// primary key and so on
+			List<Column> allTableCols = table.getColumns();
+			allTableCols.add(0, table.getPrimaryKey());
+
 			while (rs.next()) {
 				List<Column> temp = new ArrayList<>();
-				for (int i = 0; i < table.getColumns().size(); i++) {
+				for (int i = 0; i < allTableCols.size(); i++) {
 					// for each column in the row
-					Column rCol = new Column(table.getColumns().get(i).getName(),
-							table.getColumns().get(i).getDataType(),
-							table.getColumns().get(i).getLimit()
+					Column rCol = new Column(allTableCols.get(i).getName(),
+							allTableCols.get(i).getDataType(),
+							allTableCols.get(i).getLimit()
 					);
+
+					// System.out.println(rCol.getName() + " = " + rs.getString(i+1));
 
 					// set value
 					switch (rCol.getDataType()) {
@@ -613,14 +640,19 @@ public abstract class SQLOperations implements DatabaseOperations {
 		try {
 			PreparedStatement s = DatabaseManager.getInstance().getConnection().prepareStatement(query);
 			ResultSet rs = s.executeQuery();
+
+			// primary key and so on
+			List<Column> allTableCols = table.getColumns();
+			allTableCols.add(0, table.getPrimaryKey());
+
 			while (rs.next()) {
 				// for each row
 				List<Column> temp = new ArrayList<>();
-				for (int i = 0; i < table.getColumns().size(); i++) {
+				for (int i = 0; i < allTableCols.size(); i++) {
 					// for each column in the row
-					Column rCol = new Column(table.getColumns().get(i).getName(),
-											 table.getColumns().get(i).getDataType(),
-											 table.getColumns().get(i).getLimit()
+					Column rCol = new Column(allTableCols.get(i).getName(),
+											 allTableCols.get(i).getDataType(),
+											 allTableCols.get(i).getLimit()
 					);
 
 					// set value

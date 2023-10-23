@@ -1,6 +1,7 @@
 # DeathGOD7 Files
 *.backup
 *.template
+*.db
 
 # IntelliJ
 out/

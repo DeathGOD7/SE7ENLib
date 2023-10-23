@@ -24,7 +24,7 @@ import java.util.Collection;
 import java.util.List;
 
 
-public class DatabaseConnectionTest {
+public class DatabaseTest {
 
 	public String GetDatabasePath() {
 		Path resourceDirectory = Paths.get("src","test","resources", "tempdatabase");
@@ -52,19 +52,8 @@ public class DatabaseConnectionTest {
 		SQLite db = dbManager.getSQLite();
 		Connection con = db.getConnection();
 
-		/*
-		CREATE TABLE sample_table (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			varchar_column TEXT DEFAULT 'default_value' NOT NULL,
-			int_column INTEGER DEFAULT 0,
-			float_column REAL DEFAULT 0.0,
-			date_column DATE,
-			text_column TEXT,
-			boolean_column BOOLEAN DEFAULT 0,
-		);
 
 
-		 */
 
 		Column pk = new Column("id", DataType.INTEGER);
 
@@ -88,16 +77,39 @@ public class DatabaseConnectionTest {
 		Table table = new Table("tempdb", pk, tempp);
 		db.createTable(table, DatabaseManager.getInstance().getDbInfo().getDbType());
 
-		for (Table tb: DatabaseManager.getInstance().getTables().values()) {
-			System.out.println(tb.getName());
-			System.out.println(tb.getPrimaryKey().getName());
-		}
+//		for (Table tb: DatabaseManager.getInstance().getTables().values()) {
+//			System.out.println(tb.getName());
+//			System.out.println(tb.getPrimaryKey().getName());
+//		}
+
+		Column vpk = new Column("id", 1,  DataType.INTEGER);
+		Column vfirst = new Column("varchars", "meow?data", DataType.VARCHAR);
+		Column vsecond = new Column("integars", 169, DataType.INTEGER);
+		Column vthird = new Column("floats", 25691.7, DataType.FLOAT);
+		Column vfourth = new Column("texts", "damn it reallyyy works...again v2", DataType.TEXT);
+
+		List<Column> vtempp = new ArrayList<>();
+		vtempp.add(vfirst);
+		vtempp.add(vsecond);
+		vtempp.add(vthird);
+		vtempp.add(vfourth);
+
+//		db.insertData("tempdb", vtempp);
+		//db.updateData("tempdb", vpk, vtempp);
+//		List<List<Column>> test = db.findData("tempdb", vsecond);
+//		List<List<Column>> test = db.getAllDatas("tempdb");
+
+//		for (List<Column> temp : test) {
+//			for (Column c: temp) {
+//				System.out.println(c.getName() + " : " + c.getValue());
+//			}
+//		}
 
 
 	}
 
 	@Test
-//	@Disabled
+	@Disabled
 	@DisplayName("Test : MySQL database")
 	public void MySQLDatabaseConnection() {
 		DatabaseInfo dbInfo = new DatabaseInfo("test", "http://localhost", "root", "");
@@ -107,6 +119,7 @@ public class DatabaseConnectionTest {
 		Connection con = db.getConnection();
 
 		Column pk = new Column("id", DataType.INTEGER);
+		pk.setAutoIncrement(true);
 
 		Column first = new Column("varchars", DataType.VARCHAR);
 		first.setLimit(10);
@@ -128,19 +141,17 @@ public class DatabaseConnectionTest {
 		Table table = new Table("tempdb", pk, tempp);
 		db.createTable(table, DatabaseManager.getInstance().getDbInfo().getDbType());
 
-		for (Table tb: DatabaseManager.getInstance().getTables().values()) {
-			System.out.println(tb.getName());
-			System.out.println(tb.getPrimaryKey().getName());
-		}
+//		for (Table tb: DatabaseManager.getInstance().getTables().values()) {
+//			System.out.println(tb.getName());
+//			System.out.println(tb.getPrimaryKey().getName());
+//		}
 
-		// adding
-		System.out.println("adding values to tempdb");
 
-		//Column vpk = new Column("id", DataType.INTEGER);
-		Column vfirst = new Column("varchars", "a new data", DataType.VARCHAR);
+		Column vpk = new Column("id", 2,  DataType.INTEGER);
+		Column vfirst = new Column("varchars", "meow?data", DataType.VARCHAR);
 		Column vsecond = new Column("integars", 169, DataType.INTEGER);
-		Column vthird = new Column("floats", 269.69, DataType.FLOAT);
-		Column vfourth = new Column("texts", "damn it reallyyy works", DataType.TEXT);
+		Column vthird = new Column("floats", 25691.7, DataType.FLOAT);
+		Column vfourth = new Column("texts", "damn it reallyyy works...again v2", DataType.TEXT);
 
 		List<Column> vtempp = new ArrayList<>();
 		vtempp.add(vfirst);
@@ -148,7 +159,16 @@ public class DatabaseConnectionTest {
 		vtempp.add(vthird);
 		vtempp.add(vfourth);
 
-		db.insertData("tempdb", vtempp);
+//		db.insertData("tempdb", vtempp);
+//		db.updateData("tempdb", vpk, vtempp);
+//		List<List<Column>> test = db.getAllDatas("tempdb");
+
+//		for (List<Column> temp : test) {
+//			for (Column c: temp) {
+//				System.out.println(c.getName() + " : " + c.getValue());
+//			}
+//		}
+
 
 	}
 
