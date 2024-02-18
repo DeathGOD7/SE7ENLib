@@ -35,7 +35,10 @@ dependencies {
     testImplementation("org.apache.logging.log4j:log4j-slf4j-impl:2.22.1")
     // ---------- [ DotEnv ] ----------
     // For Internal Testing
-    testImplementation("io.github.cdimascio:dotenv-java:3.0.0")
+    // JAVA 11 +
+    // testImplementation("io.github.cdimascio:dotenv-java:3.0.0")
+    // JAVA 8 +
+    testImplementation("io.github.cdimascio:dotenv-java:2.3.2")
     // ---------- [ SQLite JDBC ] ----------
     // For Internal Testing
     testImplementation("org.xerial:sqlite-jdbc:3.43.2.1")
