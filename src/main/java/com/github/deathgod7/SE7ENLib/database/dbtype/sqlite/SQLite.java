@@ -3,7 +3,7 @@ package com.github.deathgod7.SE7ENLib.database.dbtype.sqlite;
 import com.github.deathgod7.SE7ENLib.database.DatabaseInfo;
 import com.github.deathgod7.SE7ENLib.database.DatabaseManager;
 import com.github.deathgod7.SE7ENLib.database.DatabaseManager.DataType;
-import com.github.deathgod7.SE7ENLib.database.SQLOperations;
+import com.github.deathgod7.SE7ENLib.database.handler.SQLOperations;
 import com.github.deathgod7.SE7ENLib.database.component.Column;
 import com.github.deathgod7.SE7ENLib.database.component.Table;
 
@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.*;
 import java.util.HashMap;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -66,7 +65,6 @@ public class SQLite extends SQLOperations {
 
 		if (!dbFile.exists()) {
 			try {
-				System.out.println(dbFile.toString());
 				dbFile.createNewFile();
 			} catch (IOException ex) {
 				ex.printStackTrace();

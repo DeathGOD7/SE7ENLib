@@ -3,7 +3,7 @@ package com.github.deathgod7.SE7ENLib.database.dbtype.mysql;
 import com.github.deathgod7.SE7ENLib.database.DatabaseInfo;
 import com.github.deathgod7.SE7ENLib.database.DatabaseManager;
 import com.github.deathgod7.SE7ENLib.database.DatabaseManager.DataType;
-import com.github.deathgod7.SE7ENLib.database.SQLOperations;
+import com.github.deathgod7.SE7ENLib.database.handler.SQLOperations;
 import com.github.deathgod7.SE7ENLib.database.component.Column;
 import com.github.deathgod7.SE7ENLib.database.component.Table;
 import com.zaxxer.hikari.HikariConfig;

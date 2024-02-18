@@ -2,13 +2,12 @@
 // Name : DatabaseOperations
 // Author : Death GOD 7
 
-package com.github.deathgod7.SE7ENLib.database;
+package com.github.deathgod7.SE7ENLib.database.handler;
 
 import com.github.deathgod7.SE7ENLib.database.DatabaseManager.DatabaseType;
 import com.github.deathgod7.SE7ENLib.database.component.Column;
 import com.github.deathgod7.SE7ENLib.database.component.Table;
 
-import java.sql.SQLException;
 import java.util.List;
 
 public interface DatabaseOperations {

@@ -6,17 +6,21 @@ package com.github.deathgod7.SE7ENLib.database.dbtype.mongodb;
 
 import static com.mongodb.client.model.Filters.eq;
 
+import com.github.deathgod7.SE7ENLib.database.DatabaseInfo;
 import com.github.deathgod7.SE7ENLib.database.component.Table;
+import com.github.deathgod7.SE7ENLib.database.handler.MongoOperations;
 import com.mongodb.MongoClientException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
-public class MongoDB {
+public class MongoDB extends MongoOperations {
 
-	private final String uri;
+	private final String host;
 	private final String username;
 	private final String password;
 	private final String dbName;
@@ -39,28 +43,47 @@ public class MongoDB {
 		return tables;
 	}
 
-	public void addTable(Table table) {
+	private void addTable(Table table) {
 		tables.put(table.getName(), table);
 	}
-	public MongoDB(String dbname, String uri, String username, String password){
-		this.uri = uri;
-		this.username = username;
-		this.password = password;
-		this.dbName = dbname;
+	public MongoDB(DatabaseInfo dbinfo){
+		this.host = dbinfo.getHostAddress();
+		this.username = dbinfo.getUsername();
+		this.password = dbinfo.getPassword();
+		this.dbName = dbinfo.getDbName();
 
-		connection = connectMongoDB();
+		this.connection = connectMongoDB();
 	}
 
 	public boolean isConnected(){
 		return (connection != null);
 	}
 
+	// mongodb uri creator using srv
+	private String URICreator(String username, String password, String hostname) {
+		return "mongodb+srv://" + username + ":" + password + "@" + hostname + "/?retryWrites=true&w=majority";
+	}
 	private MongoDatabase connectMongoDB() {
-		try(MongoClient mongoClient = MongoClients.create(uri)) {
+		String encodedPW;
+		try {
+			encodedPW = URLEncoder.encode(password, StandardCharsets.UTF_8.toString());
+		}
+		catch (Exception ex) {
+			throw new MongoClientException("Password encoding error!!");
+		}
+
+		try {
+			MongoClient mongoClient = MongoClients.create(URICreator(username, encodedPW, host));
 			return mongoClient.getDatabase(this.dbName);
 		}
 		catch (MongoClientException ex) {
 			throw new MongoClientException("Connection to db error!!");
+		}
+	}
+
+	public void loadMongoTables() {
+		for (String tablename : this.getConnection().listCollectionNames()) {
+			tables.put(tablename, this.loadTable(tablename));
 		}
 	}
 }

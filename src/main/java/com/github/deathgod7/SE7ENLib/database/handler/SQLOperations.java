@@ -2,12 +2,13 @@
 // Name : SQLOperations
 // Author : Death GOD 7
 
-package com.github.deathgod7.SE7ENLib.database;
+package com.github.deathgod7.SE7ENLib.database.handler;
 
+import com.github.deathgod7.SE7ENLib.database.DatabaseManager;
+import com.github.deathgod7.SE7ENLib.database.DatabaseManager.DataType;
+import com.github.deathgod7.SE7ENLib.database.DatabaseManager.DatabaseType;
 import com.github.deathgod7.SE7ENLib.database.component.Column;
 import com.github.deathgod7.SE7ENLib.database.component.Table;
-import com.github.deathgod7.SE7ENLib.database.DatabaseManager.DatabaseType;
-import com.github.deathgod7.SE7ENLib.database.DatabaseManager.DataType;
 
 import java.sql.*;
 import java.text.ParseException;
@@ -60,7 +61,8 @@ public abstract class SQLOperations implements DatabaseOperations {
 		System.out.println(query);
 
 		try {
-			PreparedStatement ps = DatabaseManager.getInstance().getConnection().prepareStatement(query.toString());
+			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
+			PreparedStatement ps = con.prepareStatement(query.toString());
 			ps.executeUpdate();
 			ps.close();
 			DatabaseManager dbm = DatabaseManager.getInstance();
@@ -93,7 +95,8 @@ public abstract class SQLOperations implements DatabaseOperations {
 		StringBuilder query = new StringBuilder("DROP TABLE IF EXISTS `" + tablename + ";");
 
 		try {
-			PreparedStatement ps = DatabaseManager.getInstance().getConnection().prepareStatement(query.toString());
+			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
+			PreparedStatement ps = con.prepareStatement(query.toString());
 			ps.executeUpdate();
 			ps.close();
 			DatabaseManager dbm = DatabaseManager.getInstance();
@@ -145,7 +148,8 @@ public abstract class SQLOperations implements DatabaseOperations {
 
 
 			try {
-				PreparedStatement s = DatabaseManager.getInstance().getConnection().prepareStatement(query.toString());
+				Connection con = (Connection) DatabaseManager.getInstance().getConnection();
+				PreparedStatement s = con.prepareStatement(query.toString());
 				for (int i = 0; i < columns.size(); i++) {
 					switch (columns.get(i).getDataType()) {
 						case VARCHAR:
@@ -256,7 +260,8 @@ public abstract class SQLOperations implements DatabaseOperations {
 
 		System.out.println(query);
 		try {
-			PreparedStatement s = DatabaseManager.getInstance().getConnection().prepareStatement(query.toString());
+			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
+			PreparedStatement s = con.prepareStatement(query.toString());
 			s.executeUpdate();
 			s.close();
 			return true;
@@ -278,7 +283,8 @@ public abstract class SQLOperations implements DatabaseOperations {
 	public boolean deleteData(String tablename, Column primaryKey) {
 		String query = "DELETE FROM " + tablename + " WHERE `" + primaryKey.getName() + "` = ?";
 		try {
-			PreparedStatement s = DatabaseManager.getInstance().getConnection().prepareStatement(query);
+			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
+			PreparedStatement s = con.prepareStatement(query);
 			switch (primaryKey.getDataType()) {
 				case VARCHAR:
 				case TEXT:
@@ -364,7 +370,8 @@ public abstract class SQLOperations implements DatabaseOperations {
 		}
 
 		try {
-			PreparedStatement s = DatabaseManager.getInstance().getConnection().prepareStatement(query);
+			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
+			PreparedStatement s = con.prepareStatement(query);
 
 			switch (primaryKey.getDataType()) {
 				case VARCHAR:
@@ -506,7 +513,8 @@ public abstract class SQLOperations implements DatabaseOperations {
 		}
 
 		try {
-			PreparedStatement s = DatabaseManager.getInstance().getConnection().prepareStatement(query);
+			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
+			PreparedStatement s = con.prepareStatement(query);
 
 			switch (column.getDataType()) {
 				case VARCHAR:
@@ -638,7 +646,8 @@ public abstract class SQLOperations implements DatabaseOperations {
 		Table table = DatabaseManager.getInstance().getTables().get(tablename);
 		String query = "SELECT * FROM " + tablename;
 		try {
-			PreparedStatement s = DatabaseManager.getInstance().getConnection().prepareStatement(query);
+			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
+			PreparedStatement s = con.prepareStatement(query);
 			ResultSet rs = s.executeQuery();
 
 			// primary key and so on

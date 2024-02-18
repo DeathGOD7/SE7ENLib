@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.github.deathgod7.SE7ENLib"
-version = "1.0.0"
+version = "1.1.0"
 description = "A lib to aid in development of my plugins."
 
 repositories {
@@ -29,14 +29,23 @@ repositories {
 }
 
 dependencies {
+    // ---------- [ SLF4J ] ----------
+    // For Internal Testing
+    // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
+    testImplementation("org.apache.logging.log4j:log4j-slf4j-impl:2.22.1")
+    // ---------- [ DotEnv ] ----------
+    // For Internal Testing
+    testImplementation("io.github.cdimascio:dotenv-java:3.0.0")
     // ---------- [ SQLite JDBC ] ----------
     // For Internal Testing
-    compileOnly("org.xerial:sqlite-jdbc:3.43.2.1")
+    testImplementation("org.xerial:sqlite-jdbc:3.43.2.1")
 
     // ---------- [ HikariCP ] ----------
     // https://mvnrepository.com/artifact/com.zaxxer/HikariCP
     // !!! Hikari CP for efficient MySQL support. Fast as F bois. :> !!!
-//    implementation("com.zaxxer:HikariCP:5.0.1")
+    // JAVA 11 +
+	// implementation("com.zaxxer:HikariCP:5.0.1")
+    // JAVA 8 +
     implementation("com.zaxxer:HikariCP:4.0.3")
     implementation("mysql:mysql-connector-java:8.0.33")
 

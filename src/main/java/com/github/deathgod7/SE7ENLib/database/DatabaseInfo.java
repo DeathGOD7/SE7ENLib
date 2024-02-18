@@ -70,7 +70,7 @@ public class DatabaseInfo {
 	}
 
 	/**
-	 * database Info constructor for SQLite database
+	 * Database Info constructor for SQLite database
 	 * @param dbname name of the database file
 	 * @param dbdir path where the database file is located
 	 * @since 1.0
@@ -82,16 +82,15 @@ public class DatabaseInfo {
 	}
 
 	/**
-	 * database Info constructor for MySQL database
+	 * Database Info constructor for MySQL or MongoDB database
 	 * @param dbname name of the database
 	 * @param host host name of the database
-	 * @param port port number of the database
 	 * @param username username used to login into the databse
 	 * @param password password of the given username
 	 * @since 1.0
 	 */
-	public DatabaseInfo(String dbname, String host, String username, String password) {
-		_dbType = DatabaseType.MySQL;
+	public DatabaseInfo(String dbname, String host, String username, String password, DatabaseType dbtype) {
+		_dbType = dbtype;
 		_dbName = dbname;
 		_hostAddress = host;
 		_username = username;

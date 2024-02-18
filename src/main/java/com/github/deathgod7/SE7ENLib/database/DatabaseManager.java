@@ -4,10 +4,14 @@ import com.github.deathgod7.SE7ENLib.database.component.Table;
 import com.github.deathgod7.SE7ENLib.database.dbtype.mongodb.MongoDB;
 import com.github.deathgod7.SE7ENLib.database.dbtype.mysql.MySQL;
 import com.github.deathgod7.SE7ENLib.database.dbtype.sqlite.SQLite;
+import com.mongodb.client.MongoDatabase;
+import org.bson.Document;
+import org.bson.types.ObjectId;
 
 import java.io.IOException;
 import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 public class DatabaseManager {
 	private static DatabaseManager _dbmInstance;
@@ -34,13 +38,15 @@ public class DatabaseManager {
 		return (this.getConnection() != null);
 	}
 
-	public Connection getConnection() {
+	public Object getConnection() {
 		if (_dbInfo.getDbType() == DatabaseType.SQLite) {
 			return  _sqlite.getConnection();
 		}
 		else if (_dbInfo.getDbType() == DatabaseType.MySQL){
 			// to do mysql support
 			return _mysql.getConnection();
+		} else if (_dbInfo.getDbType() == DatabaseType.MongoDB) {
+			return _mongodb.getConnection();
 		}
 		else {
 			return null;
@@ -60,7 +66,12 @@ public class DatabaseManager {
 		DOUBLE,
 		DATE,
 		TIME,
-		DATETIME
+		DATETIME,
+
+		// MongoDB Special
+		ARRAY,
+		DOCUMENT,
+		OBJECTID
 	}
 
 	public enum OrderType {
@@ -103,13 +114,48 @@ public class DatabaseManager {
 			_mysql = new MySQL(dbinfo);
 			_mysql.loadMysqlTables();
 		}
+		else if (dbinfo.getDbType() == DatabaseType.MongoDB){
+			_mongodb = new MongoDB(dbinfo);
+			_mongodb.loadMongoTables();
+		}
 		else {
 			throw new RuntimeException("Invalid or unsupported database type given!");
 		}
 	}
 
 
-
+	public DataType parseDataTypeClass(Class<?> clazz) {
+		if (clazz == String.class) {
+			return DataType.TEXT;
+		}
+		else if (clazz == Integer.class) {
+			return DataType.INTEGER;
+		}
+		else if (clazz == Boolean.class) {
+			return DataType.BOOLEAN;
+		}
+		else if (clazz == Float.class) {
+			return DataType.FLOAT;
+		}
+		else if (clazz == Double.class) {
+			return DataType.DOUBLE;
+		}
+		else if (clazz == Date.class) {
+			return DataType.DATETIME;
+		}
+		else if (clazz == ArrayList.class) {
+			return DataType.ARRAY;
+		}
+		else if (clazz == Document.class) {
+			return DataType.DOCUMENT;
+		}
+		else if (clazz == ObjectId.class) {
+			return DataType.OBJECTID;
+		}
+		else {
+			return null;
+		}
+	}
 	public DataType parseDataTypeString(String dtype) {
 		if (dtype.toUpperCase().contains("INTEGER") || dtype.toUpperCase().contains("INT")) {
 			return DataType.INTEGER;
