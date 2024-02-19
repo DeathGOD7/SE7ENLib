@@ -162,7 +162,7 @@ public class SQLite extends SQLOperations {
 					primarykey = name;
 				}
 
-				DataType dataType = DatabaseManager.getInstance().parseDataTypeString(type);
+				DataType dataType = parseDataTypeString(type);
 				Column column = new Column(name, dataType);
 				column.setNullable(notNull != 1);
 				column.setAutoIncrement(primarykey.equals(name));

@@ -124,7 +124,7 @@ public class MySQL extends SQLOperations {
 				String isNull = rs.getString("Null");
 				String defaultValue = rs.getString("Default");
 
-				DataType dataType = DatabaseManager.getInstance().parseDataTypeString(type);
+				DataType dataType = parseDataTypeString(type);
 				Column column = new Column(name, dataType);
 
 				if (rs.getString("Key").equalsIgnoreCase("PRI")) {

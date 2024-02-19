@@ -1,8 +1,5 @@
 package com.github.deathgod7.SE7ENLib.database.component;
 
-import com.github.deathgod7.SE7ENLib.database.DatabaseManager;
-import com.github.deathgod7.SE7ENLib.database.DatabaseManager.DataType;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -18,30 +15,35 @@ public class Table {
 		this.name = name;
 		this.primaryKey = primaryKey;
 		this.columns.addAll(Arrays.asList(columns));
+		this.primaryKey.setNullable(false);
 	}
 
 	public Table(String name,  Column primaryKey, Collection<Column> columns) {
 		this.name = name;
 		this.primaryKey = primaryKey;
 		this.columns.addAll(columns);
+		this.primaryKey.setNullable(false);
 	}
 
 	public Table(String name, Collection<Column> columns, Column primaryKey) {
 		this.name = name;
 		this.primaryKey = primaryKey;
 		this.columns.addAll(columns);
+		this.primaryKey.setNullable(false);
 	}
 
 	public Table(String name, Column... columns) {
 		this.name = name;
 		this.columns.addAll(Arrays.asList(columns));
 		this.primaryKey = this.columns.get(0);
+		this.primaryKey.setNullable(false);
 	}
 
 	public Table(String name, Collection<Column> columns) {
 		this.name = name;
 		this.columns.addAll(columns);
 		this.primaryKey = this.columns.get(0);
+		this.primaryKey.setNullable(false);
 	}
 
 	public String getName() {
@@ -66,43 +68,6 @@ public class Table {
 
 	public void setPrimaryKey(Column primaryKey) {
 		this.primaryKey = primaryKey;
-	}
-
-	public static String getInputDataType(DataType dataType) {
-		switch(dataType) {
-			case VARCHAR:
-				return "VARCHAR";
-			case TEXT:
-				return "TEXT";
-			case INTEGER:
-				return "INTEGER";
-			case FLOAT:
-			case DOUBLE:
-				return "FLOAT";
-			case BOOLEAN:
-				return "BOOLEAN";
-			case DATE:
-				return "DATE";
-			case TIME:
-				return "TIME";
-			case DATETIME:
-				return "DATETIME";
-			default:
-				return null;
-		}
-	}
-
-	// default query of the table
-	public String getDefaultQuery() {
-		StringBuilder query = new StringBuilder("CREATE TABLE IF NOT EXISTS " + getName() + " (");
-		for (Column column : getColumns()) {
-			query.append("`").append(column.getName()).append("` ");
-			query.append(Table.getInputDataType(column.getDataType()));
-			query.append(column.getLimit() > 0 ? " (" + column.getLimit() + "), " : ", ");
-		}
-		query.append("PRIMARY KEY (`").append(primaryKey.getName()).append("`)");
-		query.append(");");
-		return query.toString();
 	}
 
 

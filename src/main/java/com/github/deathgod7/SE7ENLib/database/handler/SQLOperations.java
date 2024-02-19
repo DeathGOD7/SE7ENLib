@@ -27,6 +27,63 @@ public abstract class SQLOperations implements DatabaseOperations {
 	@Override
 	public abstract Table loadTable(String tablename);
 
+	public DataType parseDataTypeString(String dtype) {
+		if (dtype.toUpperCase().contains("INTEGER") || dtype.toUpperCase().contains("INT")) {
+			return DataType.INTEGER;
+		}
+		else if (dtype.toUpperCase().contains("VARCHAR")) {
+			return DataType.VARCHAR;
+		}
+		else if (dtype.toUpperCase().contains("TEXT")) {
+			return DataType.TEXT;
+		}
+		else if (dtype.toUpperCase().contains("BOOLEAN")) {
+			return DataType.BOOLEAN;
+		}
+		else if (dtype.toUpperCase().contains("FLOAT") || dtype.toUpperCase().contains("REAL")) {
+			return DataType.FLOAT;
+		}
+		else if (dtype.toUpperCase().contains("DOUBLE")) {
+			return DataType.DOUBLE;
+		}
+		else if (dtype.toUpperCase().contains("DATE")) {
+			return DataType.DATE;
+		}
+		else if (dtype.toUpperCase().contains("TIME")) {
+			return DataType.TIME;
+		}
+		else if (dtype.toUpperCase().contains("DATETIME")) {
+			return DataType.DATETIME;
+		}
+		else {
+			return null;
+		}
+	}
+
+	public String parseInputDataType(DataType dataType) {
+		switch(dataType) {
+			case VARCHAR:
+				return "VARCHAR";
+			case TEXT:
+				return "TEXT";
+			case INTEGER:
+				return "INTEGER";
+			case FLOAT:
+			case DOUBLE:
+				return "FLOAT";
+			case BOOLEAN:
+				return "BOOLEAN";
+			case DATE:
+				return "DATE";
+			case TIME:
+				return "TIME";
+			case DATETIME:
+				return "DATETIME";
+			default:
+				return null;
+		}
+	}
+	
 	/**
 	 * Used for creating tables in the database
 	 *
@@ -38,7 +95,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 		StringBuilder query = new StringBuilder("CREATE TABLE IF NOT EXISTS `" + table.getName() + "` (");
 		// primary key columns
 		query.append("`").append(table.getPrimaryKey().getName()).append("` ");
-		query.append(Table.getInputDataType(table.getPrimaryKey().getDataType()));
+		query.append(this.parseInputDataType(table.getPrimaryKey().getDataType()));
 		query.append(" PRIMARY KEY");
 		if (dbtype == DatabaseType.SQLite && table.getPrimaryKey().isAutoIncrement()) {
 			query.append(" AUTOINCREMENT");
@@ -50,7 +107,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 		// remaining columns
 		for (Column column : table.getColumns()) {
 			query.append("`").append(column.getName()).append("` ");
-			query.append(Table.getInputDataType(column.getDataType()));
+			query.append(this.parseInputDataType(column.getDataType()));
 			query.append(column.getLimit() > 0 ? " (" + column.getLimit() + ") " : "");
 			query.append(column.getDefaultValue() != null ? " DEFAULT '" + column.getDefaultValue() + "' " : "");
 			query.append(!column.isNullable() ? " NOT NULL, " : ", ");

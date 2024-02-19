@@ -8,7 +8,7 @@ plugins {
 
 group = "com.github.deathgod7.SE7ENLib"
 version = "1.1.0"
-description = "A lib to aid in development of my plugins."
+description = "A lib to aid in development of my java stuff."
 
 repositories {
     mavenLocal()
@@ -57,8 +57,8 @@ dependencies {
     // !!! Mongo DB for efficient and quick BSON database !!!
     implementation("org.mongodb:mongodb-driver-sync:4.10.2")
 
-    testImplementation(platform("org.junit:junit-bom:5.9.1"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
 }
 
