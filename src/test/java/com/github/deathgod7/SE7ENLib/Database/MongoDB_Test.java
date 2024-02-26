@@ -16,6 +16,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoIterable;
 import io.github.cdimascio.dotenv.Dotenv;
+import org.bson.Document;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -55,18 +56,63 @@ public class MongoDB_Test {
 		// Print the collection count
 		System.out.println("Number of Collections in Database: " + collectionCount);
 
-		Column pk = new Column("usr_id", DataType.INTEGER);
+		Column pk = new Column("_id", DataType.INTEGER);
 
-		Table table = getTable(pk);
+//		Table table = mongo.getTables().get("tempdb");
+		Table table = mongo.getTables().get("test");
 
-		//db.getCollection("tempdb").drop();
+		// insert value in db
+		Table data = getTableData(table);
+		data.getPrimaryKey().setValue(4);
 
-		//mongo.createTable(table, DatabaseType.MongoDB);
+		List<Column> c = data.getColumns();
+		c.add(0, data.getPrimaryKey());
+
+
+		// create table
+//		mongo.createTable(getTable(), DatabaseType.MongoDB);
+
+		// check if primary exists and insert data
+//		List<Column> x = mongo.getExactData(table.getName(), c.get(0));
+//		if (x == null) {
+//			System.out.println("Check logs!!!");
+//		}
+//		else {
+//			if (!x.isEmpty()) {
+//				System.out.println("Data already exists in the table : " + table.getName() + " | Primary Key : " + pk.getName() + " | Value : " + data.getPrimaryKey().getValue());
+//			}
+//			else {
+//				mongo.insertData(table.getName(), c);
+//			}
+//		}
+
+		// find all data with ( mongodbbbbbb ) in varchars field
+//		List<List<Column>> xd = mongo.findData(table.getName(), new Column("varchars", "mongodbbbbbb", DataType.VARCHAR));
+		List<List<Column>> xd = mongo.getAllDatas(table.getName());
+
+		int ccc = 0;
+		for (List<Column> d : xd) {
+			ccc++;
+			System.out.println("\nData Count: " + ccc);
+			for (Column c1 : d) {
+				System.out.println(c1.getName() + " : " + c1.getValue());
+				if (c1.getName().equals("items")) {
+					System.out.println("Items:");
+					List<?> ff = (List<?>) c1.getValue();
+					for (Object xx : ff) {
+						for (Column fxz: (List<Column>) xx) {
+							System.out.println(fxz.getName() + " : " + fxz.getValue());
+						}
+					}
+				}
+			}
+		}
+
 
 
 	}
 
-	private static Table getTable(Column pk) {
+	private static Table getTable() {
 		Column first = new Column("varchars", DataType.VARCHAR);
 		first.setLimit(10);
 		first.setDefaultValue("defaultv");
@@ -97,10 +143,14 @@ public class MongoDB_Test {
 		tempp.add(fourth);
 		tempp.add(fifth);
 
+		Column pk = new Column("_id", DataType.INTEGER);
+		pk.setNullable(false);
+
 		return new Table("tempdb", pk, tempp);
 	}
 
-	private static Table getTableData(Column pk) {
+	private static Table getTableData(Table table) {
+
 		Column first = new Column("varchars", DataType.VARCHAR);
 		first.setValue("mongodbbbbbb");
 		Column second = new Column("integers", DataType.INTEGER);
@@ -112,7 +162,19 @@ public class MongoDB_Test {
 
 		Column f_1 = new Column("f_1", DataType.ARRAY);
 		f_1.setValue(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+
 		Column f_2 = new Column("f_2", DataType.DOCUMENT);
+
+		Column f_2_1 = new Column("f_2_1", DataType.VARCHAR);
+		f_2_1.setValue("MONGO");
+
+		Column f_2_2 = new Column("f_2_2", DataType.INTEGER);
+		f_2_2.setValue(10);
+
+		List<Column> f_2_t = Arrays.asList(f_2_1, f_2_2);
+		f_2.setValue(f_2_t);
+
+
 		Column f_3 = new Column("f_3", DataType.DOUBLE);
 		f_3.setValue(1.00);
 		Column f_4 = new Column("f_4", DataType.TEXT);
@@ -129,7 +191,8 @@ public class MongoDB_Test {
 		tempp.add(fourth);
 		tempp.add(fifth);
 
-		pk.setValue(1);
+		Column pk = new Column("_id", DataType.INTEGER);
+		pk.setNullable(false);
 
 		return new Table("tempdb", pk, tempp);
 	}

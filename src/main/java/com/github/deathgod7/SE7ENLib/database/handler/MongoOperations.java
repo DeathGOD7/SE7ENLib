@@ -46,7 +46,7 @@ public class MongoOperations implements DatabaseOperations {
 			collection = db.getCollection(tablename);
 			HashMap<String, Column> columns = new HashMap<>();
 			String _pKey = "_id";
-			Column primaryKey = new Column(_pKey, DataType.OBJECTID);
+			Column primaryKey = null;
 
 			// Convert the validator to a Document
 			Document commandResult = db.runCommand(new Document("listCollections", 1.0)
@@ -60,11 +60,14 @@ public class MongoOperations implements DatabaseOperations {
 			if (validatorDocument != null) {
 				dc = validatorDocument.get("$jsonSchema", Document.class).get("properties", Document.class);
 				for (String key : dc.keySet()) {
-					if (key.equals(_pKey)) {
-						continue;
-					}
 					String dataType = dc.get(key, Document.class).get("bsonType").toString();
 					DataType type = getDataTypeFromString(dataType);
+
+					if (key.equals(_pKey)) {
+						primaryKey = new Column(key, type);
+						continue;
+					}
+
 					Column column = new Column(key, type);
 
 					columns.put(key, column);
@@ -73,14 +76,21 @@ public class MongoOperations implements DatabaseOperations {
 				dc = collection.find().first();
 				assert dc != null;
 				for (String key : dc.keySet()) {
+					DataType type = parseDataTypeClass(dc.get(key).getClass());
+
 					if (key.equals(_pKey)) {
+						primaryKey = new Column(key, type);
 						continue;
 					}
-					DataType type = parseDataTypeClass(dc.get(key).getClass());
+
 					Column column = new Column(key, type);
 
 					columns.put(key, column);
 				}
+			}
+
+			if (primaryKey == null) {
+				return null;
 			}
 
 			return new Table(tablename, primaryKey, columns.values());
@@ -108,7 +118,7 @@ public class MongoOperations implements DatabaseOperations {
 		return columnNames;
 	}
 
-	public Document getColsAsDocument(Object value, DataType type) {
+	public Document getObjAsDocument(Object value, DataType type) {
 		if (type != DataType.DOCUMENT) {
 			return null;
 		}
@@ -124,7 +134,7 @@ public class MongoOperations implements DatabaseOperations {
 				if (!c.isNullable()) { requiredtempCols.add(c); }
 
 				if (c.getDataType() == DataType.DOCUMENT) {
-					Document tempdoc = getColsAsDocument(c.getValue(), c.getDataType());
+					Document tempdoc = getObjAsDocument(c.getValue(), c.getDataType());
 					docProperties.append(c.getName(), tempdoc);
 				} else {
 					docProperties.append(c.getName(), new Document("bsonType", this.getDataTypeForMongo(c.getDataType())));
@@ -135,12 +145,12 @@ public class MongoOperations implements DatabaseOperations {
 				.append("required", extractColumnNames(requiredtempCols))
 				.append("properties", docProperties);
 
-			System.out.println(doc.toJson() + "\n");
+//			System.out.println(doc.toJson() + "\n");
 			return doc;
 		}
 		else {
 			doc.append("bsonType", "object");
-			System.out.println(doc.toJson() + "\n");
+//			System.out.println(doc.toJson() + "\n");
 			return doc; }
 	}
 
@@ -237,21 +247,17 @@ public class MongoOperations implements DatabaseOperations {
 		// Define schema rules for the collection
 		List<Column> allCols = table.getColumns();
 
-		if (table.getPrimaryKey().getName().equals("_id")) {
+		if (!table.getPrimaryKey().getName().equals("_id")) {
 			return false;
 		}
 		else {
 			allCols.add(0, table.getPrimaryKey());
 		}
 
-		Document mainProperties = getColsAsDocument(allCols, DataType.DOCUMENT);
+		Document mainProperties = getObjAsDocument(allCols, DataType.DOCUMENT);
 
 		Document schemaDocument = new Document()
 				.append("$jsonSchema", mainProperties);
-
-		// Display the schemaDocument in JSON format
-		// System.out.println("Schema Document:");
-		// System.out.println(schemaDocument.toJson());
 
 		ValidationOptions schema = new ValidationOptions().validator(schemaDocument);
 
@@ -275,9 +281,31 @@ public class MongoOperations implements DatabaseOperations {
 			db.getCollection(tablename).drop();
 			return true;
 		} catch (Exception e) {
+			System.out.println("Error : " + e.getMessage());
 			return false;
 		}
 	}
+
+	public Document getColsAsDocument(List<Column> value) {
+		Document doc = new Document();
+
+		for (Column c : value) {
+			if (c.getDataType() == DataType.DOCUMENT) {
+				Document tempdoc = getColsAsDocument((List<Column>) c.getValue());
+				doc.append(c.getName(), tempdoc);
+			} else {
+				Object val = c.getValue();
+				if (val == null) {
+					val = "{}";
+				}
+				doc.append(c.getName(), val);
+			}
+		}
+
+		return doc;
+
+	}
+
 
 	/**
 	 * For inserting the data in the table
@@ -288,7 +316,29 @@ public class MongoOperations implements DatabaseOperations {
 	 */
 	@Override
 	public boolean insertData(String tablename, List<Column> columns) {
-		return false;
+		try {
+			MongoDatabase db = (MongoDatabase) DatabaseManager.getInstance().getConnection();
+
+			Table table = DatabaseManager.getInstance().getTables().get(tablename);
+
+			if (table == null) {
+				System.out.println("Table not found");
+				return false;
+			}
+
+
+
+			MongoCollection<Document> collection = db.getCollection(tablename);
+
+			Document doc = getColsAsDocument(columns);
+
+			collection.insertOne(doc);
+
+			return true;
+		} catch (Exception e) {
+			System.out.println("Error : " + e.getMessage());
+			return false;
+		}
 	}
 
 	/**
@@ -316,6 +366,36 @@ public class MongoOperations implements DatabaseOperations {
 		return false;
 	}
 
+	// parse the document to list of columns
+	public List<Column> parseDocToColumns(Document doc) {
+		List<Column> columns = new ArrayList<>();
+
+		doc.forEach((key, value) -> {
+			DataType dataType = this.parseDataTypeClass(value.getClass());
+			Column temp = new Column(key, dataType);
+			if (dataType == DataType.DOCUMENT) {
+				List<Column> tempcol = this.parseDocToColumns(doc.get(key, Document.class));
+				temp.setValue(tempcol);
+			} else if (dataType == DataType.ARRAY) {
+				List <?> tempvalue = (List<?>) value;
+				if (tempvalue.get(0).getClass() == Document.class) {
+					List<List<Column>> tempcol = new ArrayList<>();
+					for (Document d : (List<Document>) value) {
+						tempcol.add(this.parseDocToColumns(d));
+					}
+					temp.setValue(tempcol);
+				} else {
+					temp.setValue(value);
+				}
+			} else {
+				temp.setValue(doc.get(key));
+			}
+			columns.add(temp);
+		});
+
+		return columns;
+	}
+
 	/**
 	 * @param tablename  The name of the table in the database
 	 * @param primaryKey Unique Identifier of the Row
@@ -323,7 +403,38 @@ public class MongoOperations implements DatabaseOperations {
 	 */
 	@Override
 	public List<Column> getExactData(String tablename, Column primaryKey) {
-		return null;
+		List<Column> columns = null;
+
+		try {
+			MongoDatabase db = (MongoDatabase) DatabaseManager.getInstance().getConnection();
+
+			Table table = DatabaseManager.getInstance().getTables().get(tablename);
+
+			if (table == null) {
+				throw new Exception("Table " + tablename + " not found.");
+			}
+
+			if (!table.getPrimaryKey().getName().equals(primaryKey.getName())) {
+				throw new Exception("Primary Key is not correct for table " + tablename + " | Expected : " + table.getPrimaryKey().getName() + " | Given : " + primaryKey.getName());
+			}
+
+			columns = new ArrayList<>();
+
+			MongoCollection<Document> collection = db.getCollection(tablename);
+
+			Document docToFind = new Document(primaryKey.getName(), primaryKey.getValue());
+
+			Document res = collection.find(docToFind).first();
+
+			if (res != null) {
+				columns = parseDocToColumns(res);
+			}
+
+		} catch (Exception e) {
+			System.out.println("Error : " + e.getMessage());
+		}
+
+		return columns;
 	}
 
 	/**
@@ -333,7 +444,33 @@ public class MongoOperations implements DatabaseOperations {
 	 */
 	@Override
 	public List<List<Column>> findData(String tablename, Column column) {
-		return null;
+		List<List<Column>> allData = new ArrayList<>();
+
+		try {
+			MongoDatabase db = (MongoDatabase) DatabaseManager.getInstance().getConnection();
+
+			Table table = DatabaseManager.getInstance().getTables().get(tablename);
+
+			if (table == null) {
+				throw new Exception("Table " + tablename + " not found.");
+			}
+
+			List<Column> columns;
+
+			MongoCollection<Document> collection = db.getCollection(tablename);
+
+			Document docToFind = new Document(column.getName(), column.getValue());
+
+			for (Document doc : collection.find(docToFind)) {
+				columns = parseDocToColumns(doc);
+				allData.add(columns);
+			}
+
+		} catch (Exception e) {
+			System.out.println("Error : " + e.getMessage());
+		}
+
+		return allData;
 	}
 
 	/**
@@ -344,6 +481,30 @@ public class MongoOperations implements DatabaseOperations {
 	 */
 	@Override
 	public List<List<Column>> getAllDatas(String tablename) {
-		return null;
+		List<List<Column>> allData = new ArrayList<>();
+
+		try {
+			MongoDatabase db = (MongoDatabase) DatabaseManager.getInstance().getConnection();
+
+			Table table = DatabaseManager.getInstance().getTables().get(tablename);
+
+			if (table == null) {
+				throw new Exception("Table " + tablename + " not found.");
+			}
+
+			List<Column> columns;
+
+			MongoCollection<Document> collection = db.getCollection(tablename);
+
+			for (Document doc : collection.find()) {
+				columns = parseDocToColumns(doc);
+				allData.add(columns);
+			}
+
+		} catch (Exception e) {
+			System.out.println("Error : " + e.getMessage());
+		}
+
+		return allData;
 	}
 }
