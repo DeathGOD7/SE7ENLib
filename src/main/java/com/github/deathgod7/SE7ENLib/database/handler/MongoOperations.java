@@ -101,7 +101,7 @@ public class MongoOperations implements DatabaseOperations {
 		}
 	}
 
-	private <T> boolean checkListElementType(List<?> list) {
+	private boolean checkListElementType(List<?> list) {
 		for (Object element : list) {
 			if (!(element instanceof Column)) {
 				return false;
@@ -292,7 +292,12 @@ public class MongoOperations implements DatabaseOperations {
 
 		for (Column c : value) {
 			if (c.getDataType() == DataType.DOCUMENT) {
-				Document tempdoc = getColsAsDocument((List<Column>) c.getValue());
+				Object tempdoc;
+				if (c.getValue() == null) {
+					tempdoc = "{}";
+				} else {
+					tempdoc = getColsAsDocument((List<Column>) c.getValue());
+				}
 				doc.append(c.getName(), tempdoc);
 			} else {
 				Object val = c.getValue();

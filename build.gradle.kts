@@ -99,6 +99,7 @@ if (hasProperty("buildScan")) {
 tasks.withType<JavaCompile> {
     val sourceCompatibility = JavaVersion.VERSION_1_8
     val targetCompatibility = JavaVersion.VERSION_1_8
+//    options.compilerArgs.plusAssign("-Xlint:unchecked")
 }
 
 // for publishing in jitpack
