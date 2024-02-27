@@ -9,6 +9,7 @@ import com.github.deathgod7.SE7ENLib.database.component.Column;
 import com.github.deathgod7.SE7ENLib.database.component.Table;
 import com.github.deathgod7.SE7ENLib.database.DatabaseManager.DataType;
 import com.github.deathgod7.SE7ENLib.database.DatabaseManager.DatabaseType;
+import com.mongodb.MongoException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.CreateCollectionOptions;
@@ -351,7 +352,32 @@ public class MongoOperations implements DatabaseOperations {
 	 */
 	@Override
 	public boolean updateData(String tablename, Column primaryKey, List<Column> columns) {
-		return false;
+		try {
+			MongoDatabase db = (MongoDatabase) DatabaseManager.getInstance().getConnection();
+
+			Table table = DatabaseManager.getInstance().getTables().get(tablename);
+
+			if (table == null) {
+				throw new Exception("Table " + tablename + " not found.");
+			}
+
+			if (!table.getPrimaryKey().getName().equals(primaryKey.getName())) {
+				throw new Exception("Primary Key is not correct for table " + tablename + " | Expected : " + table.getPrimaryKey().getName() + " | Given : " + primaryKey.getName());
+			}
+
+			MongoCollection<Document> collection = db.getCollection(tablename);
+
+			Document docToFind = new Document(primaryKey.getName(), primaryKey.getValue());
+
+			Document doc = getColsAsDocument(columns);
+
+			collection.updateOne(docToFind, new Document("$set", doc));
+
+			return true;
+		} catch (Exception ex) {
+			System.out.println("Error : " + ex.getMessage());
+			return false;
+		}
 	}
 
 	/**
@@ -363,7 +389,31 @@ public class MongoOperations implements DatabaseOperations {
 	 */
 	@Override
 	public boolean deleteData(String tablename, Column primaryKey) {
-		return false;
+		try {
+			MongoDatabase db = (MongoDatabase) DatabaseManager.getInstance().getConnection();
+
+			Table table = DatabaseManager.getInstance().getTables().get(tablename);
+
+			if (table == null) {
+				throw new Exception("Table " + tablename + " not found.");
+			}
+
+			if (!table.getPrimaryKey().getName().equals(primaryKey.getName())) {
+				throw new Exception("Primary Key is not correct for table " + tablename + " | Expected : " + table.getPrimaryKey().getName() + " | Given : " + primaryKey.getName());
+			}
+
+			MongoCollection<Document> collection = db.getCollection(tablename);
+
+			Document docToFind = new Document(primaryKey.getName(), primaryKey.getValue());
+
+			collection.deleteOne(docToFind);
+
+			return true;
+
+		} catch (Exception e) {
+			System.out.println("Error : " + e.getMessage());
+			return false;
+		}
 	}
 
 	// parse the document to list of columns
@@ -506,5 +556,9 @@ public class MongoOperations implements DatabaseOperations {
 		}
 
 		return allData;
+	}
+
+	public int getDocumentCount(String tablename) {
+		return this.getAllDatas(tablename).size();
 	}
 }

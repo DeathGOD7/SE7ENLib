@@ -59,7 +59,7 @@ public class MongoDB_Test {
 		Column pk = new Column("_id", DataType.INTEGER);
 
 //		Table table = mongo.getTables().get("tempdb");
-		Table table = mongo.getTables().get("test");
+		Table table = mongo.getTables().get("tempdb");
 
 		// insert value in db
 		Table data = getTableData(table);
@@ -68,11 +68,37 @@ public class MongoDB_Test {
 		List<Column> c = data.getColumns();
 		c.add(0, data.getPrimaryKey());
 
-
 		// create table
 //		mongo.createTable(getTable(), DatabaseType.MongoDB);
 
-		// check if primary exists and insert data
+		// find all data with ( mongodbbbbbb ) in varchars field
+//		List<List<Column>> xd = mongo.findData(table.getName(), new Column("varchars", "mongodbbbbbb", DataType.VARCHAR));
+//		List<List<Column>> xd = mongo.getAllDatas(table.getName());
+//
+//		int ccc = 0;
+//		for (List<Column> d : xd) {
+//			ccc++;
+//			System.out.println("\nData Count: " + ccc);
+//			for (Column c1 : d) {
+//				System.out.println(c1.getName() + " : " + c1.getValue());
+//				if (c1.getName().equals("items")) {
+//					System.out.println("Items:");
+//					List<?> ff = (List<?>) c1.getValue();
+//					for (Object xx : ff) {
+//						for (Column fxz: (List<Column>) xx) {
+//							System.out.println(fxz.getName() + " : " + fxz.getValue());
+//						}
+//					}
+//				}
+//			}
+//		}
+
+		int size = mongo.getDocumentCount(table.getName());
+		System.out.println("Data size : " + size + "\n");
+
+//		c.get(0).setValue(size+1);
+//
+//		// check if primary exists and insert data
 //		List<Column> x = mongo.getExactData(table.getName(), c.get(0));
 //		if (x == null) {
 //			System.out.println("Check logs!!!");
@@ -86,30 +112,31 @@ public class MongoDB_Test {
 //			}
 //		}
 
-		// find all data with ( mongodbbbbbb ) in varchars field
-//		List<List<Column>> xd = mongo.findData(table.getName(), new Column("varchars", "mongodbbbbbb", DataType.VARCHAR));
-		List<List<Column>> xd = mongo.getAllDatas(table.getName());
+		// update data
+//		Column tx = new Column("integers",69, DataType.INTEGER);
+		Column pkk = data.getPrimaryKey();
+		pkk.setValue(5);
 
-		int ccc = 0;
-		for (List<Column> d : xd) {
-			ccc++;
-			System.out.println("\nData Count: " + ccc);
-			for (Column c1 : d) {
-				System.out.println(c1.getName() + " : " + c1.getValue());
-				if (c1.getName().equals("items")) {
-					System.out.println("Items:");
-					List<?> ff = (List<?>) c1.getValue();
-					for (Object xx : ff) {
-						for (Column fxz: (List<Column>) xx) {
-							System.out.println(fxz.getName() + " : " + fxz.getValue());
-						}
-					}
-				}
-			}
-		}
+		Column f_1 = new Column("f_1", DataType.ARRAY);
+		f_1.setValue(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+
+		Column f_3 = new Column("f_3", DataType.DOUBLE);
+		f_3.setValue(1.00);
+
+		Column f_4 = new Column("f_4", DataType.TEXT);
+		f_4.setValue("Nope do it again???");
+		List<Column> f_t = Arrays.asList(f_1, f_3, f_4);
 
 
+		Column fifth = new Column("multidocs", f_t, DataType.DOCUMENT);
 
+		List<Column> toupdate = new ArrayList<>();
+		toupdate.add(fifth);
+
+		mongo.updateData(table.getName(), pkk, toupdate);
+
+		// delete data
+//		mongo.deleteData(table.getName(), pkk);
 	}
 
 	private static Table getTable() {
