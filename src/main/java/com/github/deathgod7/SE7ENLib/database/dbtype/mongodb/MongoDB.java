@@ -43,8 +43,12 @@ public class MongoDB extends MongoOperations {
 		return tables;
 	}
 
-	private void addTable(Table table) {
+	public void addTable(Table table) {
 		tables.put(table.getName(), table);
+	}
+
+	public void removeTable(String tablename) {
+		tables.remove(tablename);
 	}
 	public MongoDB(DatabaseInfo dbinfo){
 		this.host = dbinfo.getHostAddress();

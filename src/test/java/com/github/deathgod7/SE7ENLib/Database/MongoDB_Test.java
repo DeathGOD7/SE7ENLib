@@ -69,7 +69,7 @@ public class MongoDB_Test {
 		c.add(0, data.getPrimaryKey());
 
 		// create table
-//		mongo.createTable(getTable(), DatabaseType.MongoDB);
+		mongo.createTable(getTable(), DatabaseType.MongoDB);
 
 		// find all data with ( mongodbbbbbb ) in varchars field
 //		List<List<Column>> xd = mongo.findData(table.getName(), new Column("varchars", "mongodbbbbbb", DataType.VARCHAR));
@@ -133,7 +133,7 @@ public class MongoDB_Test {
 		List<Column> toupdate = new ArrayList<>();
 		toupdate.add(fifth);
 
-		mongo.updateData(table.getName(), pkk, toupdate);
+//		mongo.updateData(table.getName(), pkk, toupdate);
 
 		// delete data
 //		mongo.deleteData(table.getName(), pkk);
@@ -173,7 +173,7 @@ public class MongoDB_Test {
 		Column pk = new Column("_id", DataType.INTEGER);
 		pk.setNullable(false);
 
-		return new Table("tempdb", pk, tempp);
+		return new Table("failedproject", pk, tempp);
 	}
 
 	private static Table getTableData(Table table) {

@@ -5,11 +5,10 @@
 package com.github.deathgod7.SE7ENLib.database.handler;
 
 import com.github.deathgod7.SE7ENLib.database.DatabaseManager;
-import com.github.deathgod7.SE7ENLib.database.component.Column;
-import com.github.deathgod7.SE7ENLib.database.component.Table;
 import com.github.deathgod7.SE7ENLib.database.DatabaseManager.DataType;
 import com.github.deathgod7.SE7ENLib.database.DatabaseManager.DatabaseType;
-import com.mongodb.MongoException;
+import com.github.deathgod7.SE7ENLib.database.component.Column;
+import com.github.deathgod7.SE7ENLib.database.component.Table;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.CreateCollectionOptions;
@@ -57,7 +56,7 @@ public class MongoOperations implements DatabaseOperations {
 
 
 			// Get the properties of the validator
-			Document dc = null;
+			Document dc;
 			if (validatorDocument != null) {
 				dc = validatorDocument.get("$jsonSchema", Document.class).get("properties", Document.class);
 				for (String key : dc.keySet()) {
@@ -102,9 +101,9 @@ public class MongoOperations implements DatabaseOperations {
 		}
 	}
 
-	private <T> boolean checkListElementType(List<?> list, Class<T> elementType) {
+	private <T> boolean checkListElementType(List<?> list) {
 		for (Object element : list) {
-			if (!elementType.isInstance(element)) {
+			if (!(element instanceof Column)) {
 				return false;
 			}
 		}
@@ -129,7 +128,7 @@ public class MongoOperations implements DatabaseOperations {
 		Document docProperties = new Document();
 		Document doc = new Document();
 
-		if (value instanceof List<?> && this.checkListElementType((List<?>) value, Column.class)) {
+		if (value instanceof List<?> && this.checkListElementType((List<?>) value)) {
 			alltempcols = (List<Column>) value;
 			for (Column c : alltempcols) {
 				if (!c.isNullable()) { requiredtempCols.add(c); }
@@ -146,12 +145,10 @@ public class MongoOperations implements DatabaseOperations {
 				.append("required", extractColumnNames(requiredtempCols))
 				.append("properties", docProperties);
 
-//			System.out.println(doc.toJson() + "\n");
 			return doc;
 		}
 		else {
 			doc.append("bsonType", "object");
-//			System.out.println(doc.toJson() + "\n");
 			return doc; }
 	}
 
@@ -266,6 +263,8 @@ public class MongoOperations implements DatabaseOperations {
 		CreateCollectionOptions validationOptions = new CreateCollectionOptions().validationOptions(schema);
 		db.createCollection(table.getName(), validationOptions);
 
+		DatabaseManager.getInstance().getMongoDB().addTable(table);
+
 		return true;
 	}
 
@@ -280,6 +279,7 @@ public class MongoOperations implements DatabaseOperations {
 		try {
 			MongoDatabase db = (MongoDatabase) DatabaseManager.getInstance().getConnection();
 			db.getCollection(tablename).drop();
+			DatabaseManager.getInstance().getMongoDB().removeTable(tablename);
 			return true;
 		} catch (Exception e) {
 			System.out.println("Error : " + e.getMessage());
