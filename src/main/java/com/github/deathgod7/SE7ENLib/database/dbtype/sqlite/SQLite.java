@@ -10,7 +10,7 @@ import com.github.deathgod7.SE7ENLib.database.component.Table;
 import java.io.File;
 import java.io.IOException;
 import java.sql.*;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,8 +35,8 @@ public class SQLite extends SQLOperations {
 		return  connection;
 	}
 
-	private final HashMap<String, Table> tables = new HashMap<>();
-	public HashMap<String, Table> getTables() {
+	private final LinkedHashMap<String, Table> tables = new LinkedHashMap<>();
+	public LinkedHashMap<String, Table> getTables() {
 		return tables;
 	}
 
@@ -146,7 +146,7 @@ public class SQLite extends SQLOperations {
 	public Table loadTable(String tablename) {
 		// query all the column name and its type
 		String query = "SELECT * FROM pragma_table_info('" + tablename +"');";
-		HashMap<String, Column> columns = new HashMap<>();
+		LinkedHashMap<String, Column> columns = new LinkedHashMap<>();
 		String primarykey = "";
 
 		try {

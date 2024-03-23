@@ -13,7 +13,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,8 +38,8 @@ public class MySQL extends SQLOperations {
 	public boolean isConnected(){
 		return (connection != null);
 	}
-	private final HashMap<String, Table> tables = new HashMap<>();
-	public HashMap<String, Table> getTables() {
+	private final LinkedHashMap<String, Table> tables = new LinkedHashMap<>();
+	public LinkedHashMap<String, Table> getTables() {
 		return tables;
 	}
 	public void addTable(Table table) {
@@ -112,7 +112,7 @@ public class MySQL extends SQLOperations {
 	public Table loadTable(String tablename) {
 		// query all the column name and its type
 		String query = "SHOW COLUMNS FROM " + tablename + ";";
-		HashMap<String, Column> columns = new HashMap<>();
+		LinkedHashMap<String, Column> columns = new LinkedHashMap<>();
 		String primarykey = "";
 
 		try {

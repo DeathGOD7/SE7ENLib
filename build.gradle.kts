@@ -3,12 +3,13 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 plugins {
     id("java")
     id("maven-publish")
+    signing
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "com.github.deathgod7.SE7ENLib"
 version = "1.1.0"
-description = "A lib to aid in development of my java stuff."
+description = "A lib to aid in development for my java stuff."
 
 repositories {
     mavenLocal()
@@ -50,7 +51,10 @@ dependencies {
 	// implementation("com.zaxxer:HikariCP:5.0.1")
     // JAVA 8 +
     implementation("com.zaxxer:HikariCP:4.0.3")
-    implementation("mysql:mysql-connector-java:8.0.33")
+
+    // ---------- [ MySQL Connector ] ----------
+    // https://mvnrepository.com/artifact/com.mysql/mysql-connector-j
+    implementation("com.mysql:mysql-connector-j:8.3.0")
 
     // ---------- [ MongoDB ] ----------
     // https://www.mongodb.com/docs/drivers/java/sync/current/quick-start/#quick-start
@@ -63,11 +67,12 @@ dependencies {
 }
 
 tasks.withType<ShadowJar> {
-    minimize()
+    //minimize()
     mergeServiceFiles()
-    archiveFileName.set("${project.name}-${project.version}-shadow.jar")
+    archiveFileName.set("${project.name}-shadow-${project.version}.jar")
+
     relocate ("com.zaxxer", "com.github.deathgod7")
-//    relocate ("mysql", "com.github.deathgod7")
+    relocate ("mysql", "com.github.deathgod7")
     relocate ("org.mongodb", "com.github.deathgod7")
 }
 
@@ -105,14 +110,44 @@ tasks.withType<JavaCompile> {
 // for publishing in jitpack
 publishing {
   publications {
-    create<MavenPublication>("maven") {
-      groupId = "com.github.deathgod7"
-      artifactId = "SE7ENLib"
-      version = "1.0.0"
+    create<MavenPublication>("mavenJava") {
+        groupId = "com.github.deathgod7"
+        artifactId = "SE7ENLib"
+        version = project.version.toString()
 
-      from(components["java"])
+        from(components["java"])
+
+        pom {
+            name = "SE7ENLib"
+            description = project.description.toString()
+            url = "https://github.com/DeathGOD7/SE7ENLib"
+            /*properties = mapOf(
+                    "myProp" to "value",
+                    "prop.with.dots" to "anotherValue"
+            )*/
+            licenses {
+                license {
+                    name = "GNU GENERAL PUBLIC LICENSE 3.0"
+                    url = "https://www.gnu.org/licenses/gpl-3.0.en.html"
+                }
+            }
+            developers {
+                developer {
+                    id = "deathgod7"
+                    name = "Death GOD 7"
+                    email = "laxneshlovecfc@gmail.com"
+                }
+            }
+            scm {
+                url = "https://github.com/DeathGOD7/SE7ENLib.git"
+            }
+        }
     }
   }
+}
+
+tasks.withType<Sign> {
+    sign(publishing.publications["mavenJava"])
 }
 
 tasks.withType<JavaCompile>().configureEach {

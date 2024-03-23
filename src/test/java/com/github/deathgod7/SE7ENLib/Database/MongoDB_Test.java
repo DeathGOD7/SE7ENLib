@@ -26,10 +26,9 @@ import java.util.*;
 
 public class MongoDB_Test {
 	@Test
-	//@Disabled
+	@Disabled
 	@DisplayName("Test : MongoDB database")
 	public void MongoDatabaseConnection() {
-
 		final String host = Dotenv.load().get("MONGO_HOST");
 		final String username = Dotenv.load().get("MONGO_USERNAME");
 		final String password = Dotenv.load().get("MONGO_PASSWORD");

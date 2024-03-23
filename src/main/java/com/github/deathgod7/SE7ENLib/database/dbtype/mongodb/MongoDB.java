@@ -16,7 +16,7 @@ import com.mongodb.client.MongoDatabase;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public class MongoDB extends MongoOperations {
 
@@ -38,8 +38,8 @@ public class MongoDB extends MongoOperations {
 		return  connection;
 	}
 
-	private final HashMap<String, Table> tables = new HashMap<>();
-	public HashMap<String, Table> getTables() {
+	private final LinkedHashMap<String, Table> tables = new LinkedHashMap<>();
+	public LinkedHashMap<String, Table> getTables() {
 		return tables;
 	}
 

@@ -20,7 +20,7 @@ import java.util.List;
 
 public class MySQL_Test {
 	@Test
-	@Disabled
+	//@Disabled
 	@DisplayName("Test : MySQL database")
 	public void MySQLDatabaseConnection() {
 		DatabaseInfo dbInfo = new DatabaseInfo("test", "http://localhost", "root", "", DatabaseManager.DatabaseType.MySQL);

@@ -123,7 +123,7 @@ public class DatabaseManager {
 		}
 	}
 
-	public HashMap<String, Table> getTables() {
+	public LinkedHashMap<String, Table> getTables() {
 		if (_dbInfo.getDbType() == DatabaseType.SQLite) {
 			return _sqlite.getTables();
 		}

@@ -113,7 +113,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 			query.append(!column.isNullable() ? " NOT NULL, " : ", ");
 		}
 		// end closing
-		query.replace(query.length() - 3, query.length(), ");");
+		query.replace(query.length() - 2, query.length(), ");");
 
 		System.out.println(query);
 
@@ -149,7 +149,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 	 */
 	@Override
 	public boolean dropTable(String tablename) {
-		StringBuilder query = new StringBuilder("DROP TABLE IF EXISTS `" + tablename + ";");
+		StringBuilder query = new StringBuilder("DROP TABLE IF EXISTS `" + tablename + "`;");
 
 		try {
 			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
@@ -185,7 +185,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 	@Override
 	public boolean insertData(String tablename, List<Column> columns) {
 		if (columns != null) {
-			StringBuilder query = new StringBuilder("INSERT INTO " + tablename + " (");
+			StringBuilder query = new StringBuilder("INSERT INTO `" + tablename + "` (");
 			for (Column column : columns) {
 				if (columns.indexOf(column) < columns.size() - 1) {
 					query.append("`").append(column.getName()).append("`, ");
@@ -293,7 +293,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 	 */
 	@Override
 	public boolean updateData(String tablename, Column primaryKey, List<Column> columns) {
-		StringBuilder query = new StringBuilder("UPDATE " + tablename + " SET ");
+		StringBuilder query = new StringBuilder("UPDATE `" + tablename + "` SET ");
 
 		for (Column column : columns) {
 			if (column.getDataType() == DataType.VARCHAR || column.getDataType() == DataType.TEXT) {
@@ -338,7 +338,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 	 */
 	@Override
 	public boolean deleteData(String tablename, Column primaryKey) {
-		String query = "DELETE FROM " + tablename + " WHERE `" + primaryKey.getName() + "` = ?";
+		String query = "DELETE FROM `" + tablename + "` WHERE `" + primaryKey.getName() + "` = ?";
 		try {
 			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
 			PreparedStatement s = con.prepareStatement(query);
@@ -419,7 +419,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 	public List<Column> getExactData(String tablename, Column primaryKey) {
 		List<Column> result = new ArrayList<>();
 		Table table = DatabaseManager.getInstance().getTables().get(tablename);
-		String query = "SELECT * FROM " + tablename + " WHERE `" + primaryKey.getName() + "` = ?;";
+		String query = "SELECT * FROM `" + tablename + "` WHERE `" + primaryKey.getName() + "` = ?;";
 
 		// float being weird
 		if (primaryKey.getDataType() == DataType.FLOAT) {
@@ -562,7 +562,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 	public List<List<Column>> findData(String tablename, Column column) {
 		List<List<Column>> results = new ArrayList<>();
 		Table table = DatabaseManager.getInstance().getTables().get(tablename);
-		String query = "SELECT * FROM " + tablename + " WHERE `" + column.getName() + "` = ?;";
+		String query = "SELECT * FROM `" + tablename + "` WHERE `" + column.getName() + "` = ?;";
 
 		// float being weird
 		if (column.getDataType() == DataType.FLOAT) {
@@ -701,7 +701,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 	public List<List<Column>> getAllDatas(String tablename) {
 		List<List<Column>> allDatas = new ArrayList<>();
 		Table table = DatabaseManager.getInstance().getTables().get(tablename);
-		String query = "SELECT * FROM " + tablename;
+		String query = "SELECT * FROM `" + tablename + "`;";
 		try {
 			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
 			PreparedStatement s = con.prepareStatement(query);
