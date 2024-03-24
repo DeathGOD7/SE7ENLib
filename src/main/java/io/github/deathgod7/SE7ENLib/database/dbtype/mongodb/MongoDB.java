@@ -2,13 +2,11 @@
 // Name : MongoDB
 // Author : Death GOD 7
 
-package com.github.deathgod7.SE7ENLib.database.dbtype.mongodb;
+package io.github.deathgod7.SE7ENLib.database.dbtype.mongodb;
 
-import static com.mongodb.client.model.Filters.eq;
-
-import com.github.deathgod7.SE7ENLib.database.DatabaseInfo;
-import com.github.deathgod7.SE7ENLib.database.component.Table;
-import com.github.deathgod7.SE7ENLib.database.handler.MongoOperations;
+import io.github.deathgod7.SE7ENLib.database.DatabaseInfo;
+import io.github.deathgod7.SE7ENLib.database.component.Table;
+import io.github.deathgod7.SE7ENLib.database.handler.MongoOperations;
 import com.mongodb.MongoClientException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -18,8 +16,12 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 
+/**
+ * Represents the MongoDB Database
+ * @version 1.0
+ * @since 1.0
+ */
 public class MongoDB extends MongoOperations {
-
 	private final String host;
 	private final String username;
 	private final String password;

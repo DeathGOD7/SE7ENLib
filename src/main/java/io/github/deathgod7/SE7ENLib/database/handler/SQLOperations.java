@@ -2,13 +2,13 @@
 // Name : SQLOperations
 // Author : Death GOD 7
 
-package com.github.deathgod7.SE7ENLib.database.handler;
+package io.github.deathgod7.SE7ENLib.database.handler;
 
-import com.github.deathgod7.SE7ENLib.database.DatabaseManager;
-import com.github.deathgod7.SE7ENLib.database.DatabaseManager.DataType;
-import com.github.deathgod7.SE7ENLib.database.DatabaseManager.DatabaseType;
-import com.github.deathgod7.SE7ENLib.database.component.Column;
-import com.github.deathgod7.SE7ENLib.database.component.Table;
+import io.github.deathgod7.SE7ENLib.database.DatabaseManager;
+import io.github.deathgod7.SE7ENLib.database.DatabaseManager.DataType;
+import io.github.deathgod7.SE7ENLib.database.DatabaseManager.DatabaseType;
+import io.github.deathgod7.SE7ENLib.database.component.Column;
+import io.github.deathgod7.SE7ENLib.database.component.Table;
 
 import java.sql.*;
 import java.text.ParseException;
@@ -16,6 +16,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents the SQL Operations
+ * @version 1.0
+ * @since 1.0
+ */
 public abstract class SQLOperations implements DatabaseOperations {
 
 	/**
@@ -27,6 +32,12 @@ public abstract class SQLOperations implements DatabaseOperations {
 	@Override
 	public abstract Table loadTable(String tablename);
 
+	/**
+	 * Parse the data type string to {@link DataType}
+	 *
+	 * @param dtype The data type string
+	 * @return {@link DataType}
+	 */
 	public DataType parseDataTypeString(String dtype) {
 		if (dtype.toUpperCase().contains("INTEGER") || dtype.toUpperCase().contains("INT")) {
 			return DataType.INTEGER;
@@ -60,6 +71,12 @@ public abstract class SQLOperations implements DatabaseOperations {
 		}
 	}
 
+	/**
+	 * Parse the {@link DataType} to string
+	 *
+	 * @param dataType The data type
+	 * @return {@link String}
+	 */
 	public String parseInputDataType(DataType dataType) {
 		switch(dataType) {
 			case VARCHAR:
@@ -179,7 +196,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 	 * For inserting the data in the table
 	 *
 	 * @param tablename The name of the table in the database
-	 * @param columns   Usually known as the row of data ({@link List<>}<{@link Column}> = Row)
+	 * @param columns   Usually known as the row of data ({@link List}&lt;{@link Column}&gt; = Row)
 	 * @return {@link boolean}
 	 */
 	@Override
@@ -413,7 +430,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 	/**
 	 * @param tablename  The name of the table in the database
 	 * @param primaryKey Unique Identifier of the Row
-	 * @return {@link List<>}<{@link Column}>
+	 * @return {@link List}&lt;{@link Column}&gt;
 	 */
 	@Override
 	public List<Column> getExactData(String tablename, Column primaryKey) {
@@ -556,7 +573,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 	/**
 	 * @param tablename The name of the table in the database
 	 * @param column    The column data to search for
-	 * @return {@link List<>}<{@link List<>}<{@link Column}>>
+	 * @return {@link List}&lt;{@link List}&lt;{@link Column}&gt;&gt;
 	 */
 	@Override
 	public List<List<Column>> findData(String tablename, Column column) {
@@ -695,7 +712,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 	 * Get all the data in given table
 	 *
 	 * @param tablename The name of the table in the database
-	 * @return {@link List<>}<{@link List<>}<{@link Column}>>
+	 * @return {@link List}&lt;{@link List}&lt;{@link Column}&gt;&gt;
 	 */
 	@Override
 	public List<List<Column>> getAllDatas(String tablename) {

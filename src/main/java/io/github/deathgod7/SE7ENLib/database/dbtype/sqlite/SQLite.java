@@ -1,11 +1,10 @@
-package com.github.deathgod7.SE7ENLib.database.dbtype.sqlite;
+package io.github.deathgod7.SE7ENLib.database.dbtype.sqlite;
 
-import com.github.deathgod7.SE7ENLib.database.DatabaseInfo;
-import com.github.deathgod7.SE7ENLib.database.DatabaseManager;
-import com.github.deathgod7.SE7ENLib.database.DatabaseManager.DataType;
-import com.github.deathgod7.SE7ENLib.database.handler.SQLOperations;
-import com.github.deathgod7.SE7ENLib.database.component.Column;
-import com.github.deathgod7.SE7ENLib.database.component.Table;
+import io.github.deathgod7.SE7ENLib.database.DatabaseInfo;
+import io.github.deathgod7.SE7ENLib.database.DatabaseManager;
+import io.github.deathgod7.SE7ENLib.database.handler.SQLOperations;
+import io.github.deathgod7.SE7ENLib.database.component.Column;
+import io.github.deathgod7.SE7ENLib.database.component.Table;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,8 +13,12 @@ import java.util.LinkedHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Represents the SQLite Database
+ * @version 1.0
+ * @since 1.0
+ */
 public class SQLite extends SQLOperations {
-
 	private final String dbName;
 	private final String dirDB;
 	private Connection connection;
@@ -162,7 +165,7 @@ public class SQLite extends SQLOperations {
 					primarykey = name;
 				}
 
-				DataType dataType = parseDataTypeString(type);
+				DatabaseManager.DataType dataType = parseDataTypeString(type);
 				Column column = new Column(name, dataType);
 				column.setNullable(notNull != 1);
 				column.setAutoIncrement(primarykey.equals(name));

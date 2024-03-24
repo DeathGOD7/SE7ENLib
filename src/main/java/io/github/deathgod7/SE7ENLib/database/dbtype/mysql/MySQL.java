@@ -1,11 +1,10 @@
-package com.github.deathgod7.SE7ENLib.database.dbtype.mysql;
+package io.github.deathgod7.SE7ENLib.database.dbtype.mysql;
 
-import com.github.deathgod7.SE7ENLib.database.DatabaseInfo;
-import com.github.deathgod7.SE7ENLib.database.DatabaseManager;
-import com.github.deathgod7.SE7ENLib.database.DatabaseManager.DataType;
-import com.github.deathgod7.SE7ENLib.database.handler.SQLOperations;
-import com.github.deathgod7.SE7ENLib.database.component.Column;
-import com.github.deathgod7.SE7ENLib.database.component.Table;
+import io.github.deathgod7.SE7ENLib.database.DatabaseInfo;
+import io.github.deathgod7.SE7ENLib.database.DatabaseManager.DataType;
+import io.github.deathgod7.SE7ENLib.database.handler.SQLOperations;
+import io.github.deathgod7.SE7ENLib.database.component.Column;
+import io.github.deathgod7.SE7ENLib.database.component.Table;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -17,6 +16,11 @@ import java.util.LinkedHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Represents the MySQL Database
+ * @version 1.0
+ * @since 1.0
+ */
 public class MySQL extends SQLOperations {
 	private final String host;
 	private final String username;

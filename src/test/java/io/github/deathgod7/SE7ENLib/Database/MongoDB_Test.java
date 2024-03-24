@@ -2,21 +2,17 @@
 // Name : MongoDB_Test
 // Author : Death GOD 7
 
-package com.github.deathgod7.SE7ENLib.Database;
+package io.github.deathgod7.SE7ENLib.Database;
 
-import com.github.deathgod7.SE7ENLib.database.DatabaseInfo;
-import com.github.deathgod7.SE7ENLib.database.DatabaseManager;
-import com.github.deathgod7.SE7ENLib.database.DatabaseManager.DatabaseType;
-import com.github.deathgod7.SE7ENLib.database.DatabaseManager.DataType;
-import com.github.deathgod7.SE7ENLib.database.component.Column;
-import com.github.deathgod7.SE7ENLib.database.component.Table;
-import com.github.deathgod7.SE7ENLib.database.dbtype.mongodb.MongoDB;
-import com.mongodb.client.ListCollectionsIterable;
-import com.mongodb.client.MongoCollection;
+import io.github.deathgod7.SE7ENLib.database.DatabaseInfo;
+import io.github.deathgod7.SE7ENLib.database.DatabaseManager;
+import io.github.deathgod7.SE7ENLib.database.DatabaseManager.DatabaseType;
+import io.github.deathgod7.SE7ENLib.database.DatabaseManager.DataType;
+import io.github.deathgod7.SE7ENLib.database.component.Column;
+import io.github.deathgod7.SE7ENLib.database.component.Table;
+import io.github.deathgod7.SE7ENLib.database.dbtype.mongodb.MongoDB;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.MongoIterable;
 import io.github.cdimascio.dotenv.Dotenv;
-import org.bson.Document;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

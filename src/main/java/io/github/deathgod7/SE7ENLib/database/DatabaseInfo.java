@@ -2,20 +2,23 @@
 // Name : DatabaseInfo
 // Author : Death GOD 7
 
-package com.github.deathgod7.SE7ENLib.database;
+package io.github.deathgod7.SE7ENLib.database;
 
-import com.github.deathgod7.SE7ENLib.database.DatabaseManager.DatabaseType;
-
+/**
+ * Represents the Database Information
+ * @version 1.0
+ * @since 1.0
+ */
 public class DatabaseInfo {
 	// common
-	private final DatabaseType _dbType;
+	private final DatabaseManager.DatabaseType _dbType;
 
 	/**
 	 * Returns the database type
 	 * @return {@link DatabaseManager.DatabaseType DatabseType}
 	 * @since 1.0
 	 */
-	public DatabaseType getDbType() {
+	public DatabaseManager.DatabaseType getDbType() {
 		return _dbType;
 	}
 	private String _dbName = "";
@@ -76,7 +79,7 @@ public class DatabaseInfo {
 	 * @since 1.0
 	 */
 	public DatabaseInfo(String dbname, String dbdir) {
-		_dbType = DatabaseType.SQLite;
+		_dbType = DatabaseManager.DatabaseType.SQLite;
 		_dbName = dbname;
 		_dirDB = dbdir;
 	}
@@ -87,9 +90,10 @@ public class DatabaseInfo {
 	 * @param host host name of the database
 	 * @param username username used to login into the databse
 	 * @param password password of the given username
+	 * @param dbtype type of database
 	 * @since 1.0
 	 */
-	public DatabaseInfo(String dbname, String host, String username, String password, DatabaseType dbtype) {
+	public DatabaseInfo(String dbname, String host, String username, String password, DatabaseManager.DatabaseType dbtype) {
 		_dbType = dbtype;
 		_dbName = dbname;
 		_hostAddress = host;

@@ -1,18 +1,18 @@
-package com.github.deathgod7.SE7ENLib.database;
+package io.github.deathgod7.SE7ENLib.database;
 
-import com.github.deathgod7.SE7ENLib.database.component.Table;
-import com.github.deathgod7.SE7ENLib.database.dbtype.mongodb.MongoDB;
-import com.github.deathgod7.SE7ENLib.database.dbtype.mysql.MySQL;
-import com.github.deathgod7.SE7ENLib.database.dbtype.sqlite.SQLite;
-import com.mongodb.client.MongoDatabase;
-import org.bson.Document;
-import org.bson.types.ObjectId;
+import io.github.deathgod7.SE7ENLib.database.component.Table;
+import io.github.deathgod7.SE7ENLib.database.dbtype.mongodb.MongoDB;
+import io.github.deathgod7.SE7ENLib.database.dbtype.mysql.MySQL;
+import io.github.deathgod7.SE7ENLib.database.dbtype.sqlite.SQLite;
 
-import java.io.IOException;
 import java.sql.*;
 import java.util.*;
-import java.util.Date;
 
+/**
+ * Represents the Database Manager
+ * @version 1.0
+ * @since 1.0
+ */
 public class DatabaseManager {
 	private static DatabaseManager _dbmInstance;
 	public static DatabaseManager getInstance() {

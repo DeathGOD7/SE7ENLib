@@ -2,14 +2,13 @@
 // Name : MySQL_Test
 // Author : Death GOD 7
 
-package com.github.deathgod7.SE7ENLib.Database;
+package io.github.deathgod7.SE7ENLib.Database;
 
-import com.github.deathgod7.SE7ENLib.database.DatabaseInfo;
-import com.github.deathgod7.SE7ENLib.database.DatabaseManager;
-import com.github.deathgod7.SE7ENLib.database.component.Column;
-import com.github.deathgod7.SE7ENLib.database.component.Table;
-import com.github.deathgod7.SE7ENLib.database.dbtype.mysql.MySQL;
-import org.junit.jupiter.api.Disabled;
+import io.github.deathgod7.SE7ENLib.database.DatabaseInfo;
+import io.github.deathgod7.SE7ENLib.database.DatabaseManager;
+import io.github.deathgod7.SE7ENLib.database.component.Column;
+import io.github.deathgod7.SE7ENLib.database.component.Table;
+import io.github.deathgod7.SE7ENLib.database.dbtype.mysql.MySQL;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

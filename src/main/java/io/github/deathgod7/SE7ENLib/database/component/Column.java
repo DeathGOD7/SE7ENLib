@@ -1,11 +1,15 @@
-package com.github.deathgod7.SE7ENLib.database.component;
+package io.github.deathgod7.SE7ENLib.database.component;
 
-import com.github.deathgod7.SE7ENLib.database.DatabaseManager.DataType;
+import io.github.deathgod7.SE7ENLib.database.DatabaseManager.DataType;
 
-import javax.xml.crypto.Data;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Represents a Column as well as Row in the database
+ * @version 1.0
+ * @since 1.0
+ */
 public class Column {
 	private String name;
 	private DataType dataType;
@@ -16,6 +20,11 @@ public class Column {
 	private boolean isNullable;
 
 
+	/**
+	 * Creates a new Column
+	 * @param name The name of the column
+	 * @param dataType The data type of the column
+	 */
 	public Column(String name, DataType dataType) {
 		this.name = name;
 		this.dataType = dataType;
@@ -24,6 +33,12 @@ public class Column {
 		this.isNullable = true;
 	}
 
+	/**
+	 * Creates a new Column
+	 * @param name The name of the column
+	 * @param dataType The data type of the column
+	 * @param limit The limit of the column
+	 */
 	public Column(String name, DataType dataType, int limit) {
 		this.name = name;
 		this.dataType = dataType;
@@ -32,6 +47,12 @@ public class Column {
 		this.isNullable = true;
 	}
 
+	/**
+	 * Creates a new Column
+	 * @param name The name of the column
+	 * @param value The value of the column
+	 * @param dataType The data type of the column
+	 */
 	public Column(String name, Object value, DataType dataType) {
 		this.name = name;
 		this.dataType = dataType;
@@ -45,6 +66,13 @@ public class Column {
 		this.isNullable = true;
 	}
 
+	/**
+	 * Creates a new Column
+	 * @param name The name of the column
+	 * @param value The value of the column
+	 * @param dataType The data type of the column
+	 * @param limit The limit of the column
+	 */
 	public Column(String name, Object value, DataType dataType, int limit) {
 		this.name = name;
 		this.dataType = dataType;
@@ -58,6 +86,11 @@ public class Column {
 		this.isNullable = true;
 	}
 
+	/**
+	 * Get default value for the data type
+	 * @param type
+	 * @return {@link Object}
+	 */
 	private Object getDefaultDataValue(DataType type) {
 		switch (type) {
 			case INTEGER:

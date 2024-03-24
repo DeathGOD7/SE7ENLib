@@ -7,9 +7,11 @@ plugins {
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
-group = "com.github.deathgod7.SE7ENLib"
-version = "1.1.0"
+group = "io.github.deathgod7.SE7ENLib"
+version = "1.1.0-SNAPSHOT"
 description = "A lib to aid in development for my java stuff."
+
+extra["isReleaseVersion"] = !version.toString().endsWith("SNAPSHOT")
 
 repositories {
     mavenLocal()
@@ -69,13 +71,12 @@ dependencies {
 tasks.withType<ShadowJar> {
     //minimize()
     mergeServiceFiles()
-    archiveFileName.set("${project.name}-shadow-${project.version}.jar")
+    archiveFileName.set("${project.name}-${project.version}-all.jar")
 
-    relocate ("com.zaxxer", "com.github.deathgod7")
-    relocate ("mysql", "com.github.deathgod7")
-    relocate ("org.mongodb", "com.github.deathgod7")
+    relocate ("com.zaxxer", "io.github.deathgod7")
+    relocate ("mysql", "io.github.deathgod7")
+    relocate ("org.mongodb", "io.github.deathgod7")
 }
-
 
 tasks {
     build {
@@ -102,29 +103,42 @@ if (hasProperty("buildScan")) {
 }
 
 tasks.withType<JavaCompile> {
-    val sourceCompatibility = JavaVersion.VERSION_1_8
-    val targetCompatibility = JavaVersion.VERSION_1_8
-//    options.compilerArgs.plusAssign("-Xlint:unchecked")
+    options.compilerArgs.add("-Xlint:unchecked")
 }
 
-// for publishing in jitpack
+// for publishing the library
+val sourcesJar by tasks.registering(Jar::class) {
+    from(sourceSets["main"].allJava)
+    archiveClassifier.set("sources")
+}
+
+val javadocJar by tasks.registering(Jar::class) {
+    from(tasks.javadoc)
+    archiveClassifier.set("javadoc")
+}
+
+tasks.withType<JavaCompile> {
+}
+
 publishing {
   publications {
     create<MavenPublication>("mavenJava") {
-        groupId = "com.github.deathgod7"
+        groupId = "io.github.deathgod7"
         artifactId = "SE7ENLib"
         version = project.version.toString()
+        description = project.description.toString()
 
         from(components["java"])
+        artifact(sourcesJar)
+        artifact(javadocJar)
 
         pom {
             name = "SE7ENLib"
             description = project.description.toString()
             url = "https://github.com/DeathGOD7/SE7ENLib"
-            /*properties = mapOf(
-                    "myProp" to "value",
-                    "prop.with.dots" to "anotherValue"
-            )*/
+            properties = mapOf(
+                    "release-type" to if (project.extra["isReleaseVersion"] as Boolean) "PUBLIC RELEASE" else "SNAPSHOT RELEASE"
+            )
             licenses {
                 license {
                     name = "GNU GENERAL PUBLIC LICENSE 3.0"

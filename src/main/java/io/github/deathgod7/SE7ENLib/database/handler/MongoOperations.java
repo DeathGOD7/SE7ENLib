@@ -2,13 +2,11 @@
 // Name : MongoOperations
 // Author : Death GOD 7
 
-package com.github.deathgod7.SE7ENLib.database.handler;
+package io.github.deathgod7.SE7ENLib.database.handler;
 
-import com.github.deathgod7.SE7ENLib.database.DatabaseManager;
-import com.github.deathgod7.SE7ENLib.database.DatabaseManager.DataType;
-import com.github.deathgod7.SE7ENLib.database.DatabaseManager.DatabaseType;
-import com.github.deathgod7.SE7ENLib.database.component.Column;
-import com.github.deathgod7.SE7ENLib.database.component.Table;
+import io.github.deathgod7.SE7ENLib.database.DatabaseManager;
+import io.github.deathgod7.SE7ENLib.database.component.Column;
+import io.github.deathgod7.SE7ENLib.database.component.Table;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.CreateCollectionOptions;
@@ -21,6 +19,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Represents the Mongo Operations
+ * @version 1.0
+ * @since 1.0
+ */
 public class MongoOperations implements DatabaseOperations {
 
 	public boolean collectionExists(String collectionName, MongoDatabase database) {
@@ -40,8 +43,14 @@ public class MongoOperations implements DatabaseOperations {
 	 */
 	@Override
 	public Table loadTable(String tablename) {
-		MongoDatabase db = (MongoDatabase) DatabaseManager.getInstance().getConnection();
+		MongoDatabase db = null;
+		if (DatabaseManager.getInstance().getConnection() instanceof MongoDatabase)
+			db = (MongoDatabase) DatabaseManager.getInstance().getConnection();
+		else
+			return null;
+
 		MongoCollection<Document> collection;
+
 		if (this.collectionExists(tablename, db)) {
 			collection = db.getCollection(tablename);
 			HashMap<String, Column> columns = new HashMap<>();
@@ -61,7 +70,7 @@ public class MongoOperations implements DatabaseOperations {
 				dc = validatorDocument.get("$jsonSchema", Document.class).get("properties", Document.class);
 				for (String key : dc.keySet()) {
 					String dataType = dc.get(key, Document.class).get("bsonType").toString();
-					DataType type = getDataTypeFromString(dataType);
+					DatabaseManager.DataType type = getDataTypeFromString(dataType);
 
 					if (key.equals(_pKey)) {
 						primaryKey = new Column(key, type);
@@ -76,7 +85,7 @@ public class MongoOperations implements DatabaseOperations {
 				dc = collection.find().first();
 				assert dc != null;
 				for (String key : dc.keySet()) {
-					DataType type = parseDataTypeClass(dc.get(key).getClass());
+					DatabaseManager.DataType type = parseDataTypeClass(dc.get(key).getClass());
 
 					if (key.equals(_pKey)) {
 						primaryKey = new Column(key, type);
@@ -118,8 +127,8 @@ public class MongoOperations implements DatabaseOperations {
 		return columnNames;
 	}
 
-	public Document getObjAsDocument(Object value, DataType type) {
-		if (type != DataType.DOCUMENT) {
+	public Document getObjAsDocument(Object value, DatabaseManager.DataType type) {
+		if (type != DatabaseManager.DataType.DOCUMENT) {
 			return null;
 		}
 		List<Column> alltempcols;
@@ -133,7 +142,7 @@ public class MongoOperations implements DatabaseOperations {
 			for (Column c : alltempcols) {
 				if (!c.isNullable()) { requiredtempCols.add(c); }
 
-				if (c.getDataType() == DataType.DOCUMENT) {
+				if (c.getDataType() == DatabaseManager.DataType.DOCUMENT) {
 					Document tempdoc = getObjAsDocument(c.getValue(), c.getDataType());
 					docProperties.append(c.getName(), tempdoc);
 				} else {
@@ -152,7 +161,7 @@ public class MongoOperations implements DatabaseOperations {
 			return doc; }
 	}
 
-	public String getDataTypeForMongo(DataType type) {
+	public String getDataTypeForMongo(DatabaseManager.DataType type) {
 		switch (type) {
 			case DATE:
 				return "date";
@@ -174,56 +183,56 @@ public class MongoOperations implements DatabaseOperations {
 		}
 	}
 
-	public DataType parseDataTypeClass(Class<?> clazz) {
+	public DatabaseManager.DataType parseDataTypeClass(Class<?> clazz) {
 		if (clazz == String.class) {
-			return DataType.TEXT;
+			return DatabaseManager.DataType.TEXT;
 		}
 		else if (clazz == Integer.class) {
-			return DataType.INTEGER;
+			return DatabaseManager.DataType.INTEGER;
 		}
 		else if (clazz == Boolean.class) {
-			return DataType.BOOLEAN;
+			return DatabaseManager.DataType.BOOLEAN;
 		}
 		else if (clazz == Float.class) {
-			return DataType.FLOAT;
+			return DatabaseManager.DataType.FLOAT;
 		}
 		else if (clazz == Double.class) {
-			return DataType.DOUBLE;
+			return DatabaseManager.DataType.DOUBLE;
 		}
 		else if (clazz == Date.class) {
-			return DataType.DATETIME;
+			return DatabaseManager.DataType.DATETIME;
 		}
 		else if (clazz == ArrayList.class) {
-			return DataType.ARRAY;
+			return DatabaseManager.DataType.ARRAY;
 		}
 		else if (clazz == Document.class) {
-			return DataType.DOCUMENT;
+			return DatabaseManager.DataType.DOCUMENT;
 		}
 		else if (clazz == ObjectId.class) {
-			return DataType.OBJECTID;
+			return DatabaseManager.DataType.OBJECTID;
 		}
 		else {
 			return null;
 		}
 	}
 
-	public DataType getDataTypeFromString(String type) {
+	public DatabaseManager.DataType getDataTypeFromString(String type) {
 		switch (type) {
 			case "date":
-				return DataType.DATE;
+				return DatabaseManager.DataType.DATE;
 			case "int":
-				return DataType.INTEGER;
+				return DatabaseManager.DataType.INTEGER;
 			case "double":
-				return DataType.DOUBLE;
+				return DatabaseManager.DataType.DOUBLE;
 			case "bool":
-				return DataType.BOOLEAN;
+				return DatabaseManager.DataType.BOOLEAN;
 			case "array":
-				return DataType.ARRAY;
+				return DatabaseManager.DataType.ARRAY;
 			case "object":
-				return DataType.DOCUMENT;
+				return DatabaseManager.DataType.DOCUMENT;
 			case "string":
 			default:
-				return DataType.VARCHAR;
+				return DatabaseManager.DataType.VARCHAR;
 		}
 	}
 
@@ -235,12 +244,17 @@ public class MongoOperations implements DatabaseOperations {
 	 * @return {@link boolean}
 	 */
 	@Override
-	public boolean createTable(Table table, DatabaseType dbtype) {
-		if (dbtype != DatabaseType.MongoDB) {
+	public boolean createTable(Table table, DatabaseManager.DatabaseType dbtype) {
+		if (dbtype != DatabaseManager.DatabaseType.MongoDB) {
 			return false;
 		}
 
-		MongoDatabase db = (MongoDatabase) DatabaseManager.getInstance().getConnection();
+		MongoDatabase db;
+
+		if (DatabaseManager.getInstance().getConnection() instanceof MongoDatabase)
+			db = (MongoDatabase) DatabaseManager.getInstance().getConnection();
+		else
+			return false;
 
 		// Define schema rules for the collection
 		List<Column> allCols = table.getColumns();
@@ -252,7 +266,7 @@ public class MongoOperations implements DatabaseOperations {
 			allCols.add(0, table.getPrimaryKey());
 		}
 
-		Document mainProperties = getObjAsDocument(allCols, DataType.DOCUMENT);
+		Document mainProperties = getObjAsDocument(allCols, DatabaseManager.DataType.DOCUMENT);
 
 		Document schemaDocument = new Document()
 				.append("$jsonSchema", mainProperties);
@@ -277,7 +291,13 @@ public class MongoOperations implements DatabaseOperations {
 	@Override
 	public boolean dropTable(String tablename) {
 		try {
-			MongoDatabase db = (MongoDatabase) DatabaseManager.getInstance().getConnection();
+			MongoDatabase db;
+
+			if (DatabaseManager.getInstance().getConnection() instanceof MongoDatabase)
+				db = (MongoDatabase) DatabaseManager.getInstance().getConnection();
+			else
+				return false;
+
 			db.getCollection(tablename).drop();
 			DatabaseManager.getInstance().getMongoDB().removeTable(tablename);
 			return true;
@@ -291,7 +311,7 @@ public class MongoOperations implements DatabaseOperations {
 		Document doc = new Document();
 
 		for (Column c : value) {
-			if (c.getDataType() == DataType.DOCUMENT) {
+			if (c.getDataType() == DatabaseManager.DataType.DOCUMENT) {
 				Object tempdoc;
 				if (c.getValue() == null) {
 					tempdoc = "{}";
@@ -317,13 +337,17 @@ public class MongoOperations implements DatabaseOperations {
 	 * For inserting the data in the table
 	 *
 	 * @param tablename The name of the table in the database
-	 * @param columns   Usually known as the row of data ({@link List <>}<{@link Column}> = Row)
+	 * @param columns   Usually known as the row of data ({@link List}&lt;{@link Column}&gt; = Row)
 	 * @return {@link boolean}
 	 */
 	@Override
 	public boolean insertData(String tablename, List<Column> columns) {
 		try {
-			MongoDatabase db = (MongoDatabase) DatabaseManager.getInstance().getConnection();
+			MongoDatabase db;
+			if (DatabaseManager.getInstance().getConnection() instanceof MongoDatabase)
+				db = (MongoDatabase) DatabaseManager.getInstance().getConnection();
+			else
+				return false;
 
 			Table table = DatabaseManager.getInstance().getTables().get(tablename);
 
@@ -358,7 +382,11 @@ public class MongoOperations implements DatabaseOperations {
 	@Override
 	public boolean updateData(String tablename, Column primaryKey, List<Column> columns) {
 		try {
-			MongoDatabase db = (MongoDatabase) DatabaseManager.getInstance().getConnection();
+			MongoDatabase db;
+			if (DatabaseManager.getInstance().getConnection() instanceof MongoDatabase)
+				db = (MongoDatabase) DatabaseManager.getInstance().getConnection();
+			else
+				return false;
 
 			Table table = DatabaseManager.getInstance().getTables().get(tablename);
 
@@ -395,7 +423,12 @@ public class MongoOperations implements DatabaseOperations {
 	@Override
 	public boolean deleteData(String tablename, Column primaryKey) {
 		try {
-			MongoDatabase db = (MongoDatabase) DatabaseManager.getInstance().getConnection();
+			MongoDatabase db;
+
+			if (DatabaseManager.getInstance().getConnection() instanceof MongoDatabase)
+				db = (MongoDatabase) DatabaseManager.getInstance().getConnection();
+			else
+				return false;
 
 			Table table = DatabaseManager.getInstance().getTables().get(tablename);
 
@@ -426,12 +459,12 @@ public class MongoOperations implements DatabaseOperations {
 		List<Column> columns = new ArrayList<>();
 
 		doc.forEach((key, value) -> {
-			DataType dataType = this.parseDataTypeClass(value.getClass());
+			DatabaseManager.DataType dataType = this.parseDataTypeClass(value.getClass());
 			Column temp = new Column(key, dataType);
-			if (dataType == DataType.DOCUMENT) {
+			if (dataType == DatabaseManager.DataType.DOCUMENT) {
 				List<Column> tempcol = this.parseDocToColumns(doc.get(key, Document.class));
 				temp.setValue(tempcol);
-			} else if (dataType == DataType.ARRAY) {
+			} else if (dataType == DatabaseManager.DataType.ARRAY) {
 				List <?> tempvalue = (List<?>) value;
 				if (tempvalue.get(0).getClass() == Document.class) {
 					List<List<Column>> tempcol = new ArrayList<>();
@@ -454,14 +487,19 @@ public class MongoOperations implements DatabaseOperations {
 	/**
 	 * @param tablename  The name of the table in the database
 	 * @param primaryKey Unique Identifier of the Row
-	 * @return {@link List<>}<{@link Column}>
+	 * @return {@link List}&lt;{@link Column}&gt;
 	 */
 	@Override
 	public List<Column> getExactData(String tablename, Column primaryKey) {
 		List<Column> columns = null;
 
 		try {
-			MongoDatabase db = (MongoDatabase) DatabaseManager.getInstance().getConnection();
+			MongoDatabase db;
+
+			if (DatabaseManager.getInstance().getConnection() instanceof MongoDatabase)
+				db = (MongoDatabase) DatabaseManager.getInstance().getConnection();
+			else
+				return null;
 
 			Table table = DatabaseManager.getInstance().getTables().get(tablename);
 
@@ -495,14 +533,19 @@ public class MongoOperations implements DatabaseOperations {
 	/**
 	 * @param tablename The name of the table in the database
 	 * @param column    The column data to search for
-	 * @return {@link List<>}<{@link List<>}<{@link Column}>>
+	 * @return {@link List}&lt;{@link List}&lt;{@link Column}&gt;&gt;
 	 */
 	@Override
 	public List<List<Column>> findData(String tablename, Column column) {
 		List<List<Column>> allData = new ArrayList<>();
 
 		try {
-			MongoDatabase db = (MongoDatabase) DatabaseManager.getInstance().getConnection();
+			MongoDatabase db;
+
+			if (DatabaseManager.getInstance().getConnection() instanceof MongoDatabase)
+				db = (MongoDatabase) DatabaseManager.getInstance().getConnection();
+			else
+				return null;
 
 			Table table = DatabaseManager.getInstance().getTables().get(tablename);
 
@@ -532,14 +575,19 @@ public class MongoOperations implements DatabaseOperations {
 	 * Get all the data in given table
 	 *
 	 * @param tablename The name of the table in the database
-	 * @return {@link List<>}<{@link List<>}<{@link Column}>>
+	 * @return {@link List}&lt;{@link List}&lt;{@link Column}&gt;&gt;
 	 */
 	@Override
 	public List<List<Column>> getAllDatas(String tablename) {
 		List<List<Column>> allData = new ArrayList<>();
 
 		try {
-			MongoDatabase db = (MongoDatabase) DatabaseManager.getInstance().getConnection();
+			MongoDatabase db;
+
+			if (DatabaseManager.getInstance().getConnection() instanceof MongoDatabase)
+				db = (MongoDatabase) DatabaseManager.getInstance().getConnection();
+			else
+				return null;
 
 			Table table = DatabaseManager.getInstance().getTables().get(tablename);
 
