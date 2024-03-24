@@ -127,6 +127,7 @@ public class MongoOperations implements DatabaseOperations {
 		return columnNames;
 	}
 
+	@SuppressWarnings("unchecked")
 	public Document getObjAsDocument(Object value, DatabaseManager.DataType type) {
 		if (type != DatabaseManager.DataType.DOCUMENT) {
 			return null;
@@ -138,7 +139,14 @@ public class MongoOperations implements DatabaseOperations {
 		Document doc = new Document();
 
 		if (value instanceof List<?> && this.checkListElementType((List<?>) value)) {
-			alltempcols = (List<Column>) value;
+			try {
+
+				alltempcols = (List<Column>) value;
+			} catch (Exception ex) {
+				System.out.println(ex.getMessage());
+				return null;
+			}
+
 			for (Column c : alltempcols) {
 				if (!c.isNullable()) { requiredtempCols.add(c); }
 
@@ -307,6 +315,7 @@ public class MongoOperations implements DatabaseOperations {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public Document getColsAsDocument(List<Column> value) {
 		Document doc = new Document();
 
@@ -454,7 +463,9 @@ public class MongoOperations implements DatabaseOperations {
 		}
 	}
 
+
 	// parse the document to list of columns
+	@SuppressWarnings("unchecked")
 	public List<Column> parseDocToColumns(Document doc) {
 		List<Column> columns = new ArrayList<>();
 
