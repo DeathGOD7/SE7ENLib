@@ -113,6 +113,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 		// primary key columns
 		query.append("`").append(table.getPrimaryKey().getName()).append("` ");
 		query.append(this.parseInputDataType(table.getPrimaryKey().getDataType()));
+		query.append(table.getPrimaryKey().getLimit() > 0 ? " (" + table.getPrimaryKey().getLimit() + ")" : "");
 		query.append(" PRIMARY KEY");
 		if (dbtype == DatabaseType.SQLite && table.getPrimaryKey().isAutoIncrement()) {
 			query.append(" AUTOINCREMENT");
@@ -125,8 +126,8 @@ public abstract class SQLOperations implements DatabaseOperations {
 		for (Column column : table.getColumns()) {
 			query.append("`").append(column.getName()).append("` ");
 			query.append(this.parseInputDataType(column.getDataType()));
-			query.append(column.getLimit() > 0 ? " (" + column.getLimit() + ") " : "");
-			query.append(column.getDefaultValue() != null ? " DEFAULT '" + column.getDefaultValue() + "' " : "");
+			query.append(column.getLimit() > 0 ? " (" + column.getLimit() + ")" : "");
+			query.append(column.getDefaultValue() != null ? " DEFAULT '" + column.getDefaultValue() + "'" : "");
 			query.append(!column.isNullable() ? " NOT NULL, " : ", ");
 		}
 		// end closing

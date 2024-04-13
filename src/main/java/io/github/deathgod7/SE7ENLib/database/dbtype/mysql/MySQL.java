@@ -77,7 +77,7 @@ public class MySQL extends SQLOperations {
 		config.setJdbcUrl("jdbc:mysql://" + cleanedUrl + "/" + this.dbName);
 		config.setUsername(this.username);
 		config.setPassword(this.password);
-		config.setDriverClassName("com.mysql.cj.jdbc.Driver");
+		//config.setDriverClassName("com.mysql.cj.jdbc.Driver");
 		config.addDataSourceProperty("cachePrepStmts", "true");
 		config.addDataSourceProperty("prepStmtCacheSize", "250");
 		config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
@@ -115,7 +115,7 @@ public class MySQL extends SQLOperations {
 	}
 	public Table loadTable(String tablename) {
 		// query all the column name and its type
-		String query = "SHOW COLUMNS FROM " + tablename + ";";
+		String query = "SHOW COLUMNS FROM `" + tablename + "`;";
 		LinkedHashMap<String, Column> columns = new LinkedHashMap<>();
 		String primarykey = "";
 

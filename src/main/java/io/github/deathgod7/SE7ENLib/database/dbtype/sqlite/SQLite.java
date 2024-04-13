@@ -148,7 +148,8 @@ public class SQLite extends SQLOperations {
 	// sqlite based querys
 	public Table loadTable(String tablename) {
 		// query all the column name and its type
-		String query = "SELECT * FROM pragma_table_info('" + tablename +"');";
+		// String query = "SELECT * FROM pragma_table_info('" + tablename +"');";
+		String query = "PRAGMA table_info(`" + tablename + "`);";
 		LinkedHashMap<String, Column> columns = new LinkedHashMap<>();
 		String primarykey = "";
 
