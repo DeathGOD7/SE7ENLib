@@ -56,7 +56,7 @@ dependencies {
 
     // ---------- [ MySQL Connector ] ----------
     // https://mvnrepository.com/artifact/com.mysql/mysql-connector-j
-    implementation("com.mysql:mysql-connector-j:8.3.0")
+    testImplementation("com.mysql:mysql-connector-j:8.3.0")
 
     // ---------- [ MongoDB ] ----------
     // https://www.mongodb.com/docs/drivers/java/sync/current/quick-start/#quick-start
@@ -74,7 +74,7 @@ tasks.withType<ShadowJar> {
     archiveFileName.set("${project.name}-${project.version}-all.jar")
 
     relocate ("com.zaxxer", "io.github.deathgod7")
-    relocate ("mysql", "io.github.deathgod7")
+    //relocate ("mysql", "io.github.deathgod7")
     relocate ("org.mongodb", "io.github.deathgod7")
 }
 
