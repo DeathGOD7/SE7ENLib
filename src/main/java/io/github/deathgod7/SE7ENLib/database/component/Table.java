@@ -78,26 +78,50 @@ public class Table {
 		this.primaryKey.setNullable(false);
 	}
 
+	/**
+	 * Get the name of the table
+	 * @return {@link String}
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * Set the name of the table
+	 * @param name The name to set
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	/**
+	 * Get the columns of the table
+	 * @return {@link List}
+	 */
 	public List<Column> getColumns() {
 		return columns;
 	}
 
+	/**
+	 * Set the columns of the table
+	 * @param columns The columns to set
+	 */
 	public void setColumns(List<Column> columns) {
 		this.columns = columns;
 	}
 
+	/**
+	 * Get the primary key of the table
+	 * @return {@link Column}
+	 */
 	public Column getPrimaryKey() {
 		return primaryKey;
 	}
 
+	/**
+	 * Set the primary key of the table
+	 * @param primaryKey The primary key to set
+	 */
 	public void setPrimaryKey(Column primaryKey) {
 		this.primaryKey = primaryKey;
 	}

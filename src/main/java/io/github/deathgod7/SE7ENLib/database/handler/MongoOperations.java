@@ -5,12 +5,14 @@
 package io.github.deathgod7.SE7ENLib.database.handler;
 
 import io.github.deathgod7.SE7ENLib.database.DatabaseManager;
+import io.github.deathgod7.SE7ENLib.database.DatabaseManager.DataType;
 import io.github.deathgod7.SE7ENLib.database.component.Column;
 import io.github.deathgod7.SE7ENLib.database.component.Table;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.CreateCollectionOptions;
 import com.mongodb.client.model.ValidationOptions;
+import io.github.deathgod7.SE7ENLib.Logger;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
@@ -26,6 +28,12 @@ import java.util.List;
  */
 public class MongoOperations implements DatabaseOperations {
 
+	/**
+	 * Check if the collection exists
+	 * @param collectionName The name of the collection
+	 * @param database The database
+	 * @return {@link Boolean}
+	 */
 	public boolean collectionExists(String collectionName, MongoDatabase database) {
 		for (String existingCollection : database.listCollectionNames()) {
 			if (existingCollection.equals(collectionName)) {
@@ -127,6 +135,12 @@ public class MongoOperations implements DatabaseOperations {
 		return columnNames;
 	}
 
+	/**
+	 * Convert the object to document
+	 * @param value The object to convert (usually obtained from Column#getValue()
+	 * @param type The data type of the object
+	 * @return {@link Document}
+	 */
 	@SuppressWarnings("unchecked")
 	public Document getObjAsDocument(Object value, DatabaseManager.DataType type) {
 		if (type != DatabaseManager.DataType.DOCUMENT) {
@@ -143,7 +157,7 @@ public class MongoOperations implements DatabaseOperations {
 
 				alltempcols = (List<Column>) value;
 			} catch (Exception ex) {
-				System.out.println(ex.getMessage());
+				Logger.log("[ERROR] " + ex.getMessage());
 				return null;
 			}
 
@@ -169,6 +183,11 @@ public class MongoOperations implements DatabaseOperations {
 			return doc; }
 	}
 
+	/**
+	 * Get the data type for MongoDB
+	 * @param type The data type
+	 * @return {@link String}
+	 */
 	public String getDataTypeForMongo(DatabaseManager.DataType type) {
 		switch (type) {
 			case DATE:
@@ -191,6 +210,11 @@ public class MongoOperations implements DatabaseOperations {
 		}
 	}
 
+	/**
+	 * Parse the data type class
+	 * @param clazz The class to parse
+	 * @return {@link DatabaseManager.DataType}
+	 */
 	public DatabaseManager.DataType parseDataTypeClass(Class<?> clazz) {
 		if (clazz == String.class) {
 			return DatabaseManager.DataType.TEXT;
@@ -224,7 +248,12 @@ public class MongoOperations implements DatabaseOperations {
 		}
 	}
 
-	public DatabaseManager.DataType getDataTypeFromString(String type) {
+	/**
+	 * Get the data type from string
+	 * @param type The type to parse
+	 * @return {@link DataType}
+	 */
+	public DataType getDataTypeFromString(String type) {
 		switch (type) {
 			case "date":
 				return DatabaseManager.DataType.DATE;
@@ -240,7 +269,7 @@ public class MongoOperations implements DatabaseOperations {
 				return DatabaseManager.DataType.DOCUMENT;
 			case "string":
 			default:
-				return DatabaseManager.DataType.VARCHAR;
+				return DatabaseManager.DataType.TEXT;
 		}
 	}
 
@@ -310,11 +339,17 @@ public class MongoOperations implements DatabaseOperations {
 			DatabaseManager.getInstance().getMongoDB().removeTable(tablename);
 			return true;
 		} catch (Exception e) {
-			System.out.println("Error : " + e.getMessage());
+			Logger.log("[ERROR] " + e.getMessage());
 			return false;
 		}
 	}
 
+
+	/**
+	 * Convert the list of columns to document
+	 * @param value The list of columns
+	 * @return {@link Document}
+	 */
 	@SuppressWarnings("unchecked")
 	public Document getColsAsDocument(List<Column> value) {
 		Document doc = new Document();
@@ -361,7 +396,7 @@ public class MongoOperations implements DatabaseOperations {
 			Table table = DatabaseManager.getInstance().getTables().get(tablename);
 
 			if (table == null) {
-				System.out.println("Table not found");
+				Logger.log("[ERROR] Table not found.");
 				return false;
 			}
 
@@ -375,7 +410,7 @@ public class MongoOperations implements DatabaseOperations {
 
 			return true;
 		} catch (Exception e) {
-			System.out.println("Error : " + e.getMessage());
+			Logger.log("[ERROR] " + e.getMessage());
 			return false;
 		}
 	}
@@ -416,8 +451,8 @@ public class MongoOperations implements DatabaseOperations {
 			collection.updateOne(docToFind, new Document("$set", doc));
 
 			return true;
-		} catch (Exception ex) {
-			System.out.println("Error : " + ex.getMessage());
+		} catch (Exception e) {
+			Logger.log("[ERROR] " + e.getMessage());
 			return false;
 		}
 	}
@@ -458,13 +493,17 @@ public class MongoOperations implements DatabaseOperations {
 			return true;
 
 		} catch (Exception e) {
-			System.out.println("Error : " + e.getMessage());
+			Logger.log("[ERROR] " + e.getMessage());
 			return false;
 		}
 	}
 
 
-	// parse the document to list of columns
+	/**
+	 * Parse the document to columns
+	 * @param doc The document to parse
+	 * @return {@link List}&lt;{@link Column}&gt;
+	 */
 	@SuppressWarnings("unchecked")
 	public List<Column> parseDocToColumns(Document doc) {
 		List<Column> columns = new ArrayList<>();
@@ -535,7 +574,7 @@ public class MongoOperations implements DatabaseOperations {
 			}
 
 		} catch (Exception e) {
-			System.out.println("Error : " + e.getMessage());
+			Logger.log("[ERROR] " + e.getMessage());
 		}
 
 		return columns;
@@ -576,7 +615,7 @@ public class MongoOperations implements DatabaseOperations {
 			}
 
 		} catch (Exception e) {
-			System.out.println("Error : " + e.getMessage());
+			Logger.log("[ERROR] " + e.getMessage());
 		}
 
 		return allData;
@@ -616,12 +655,18 @@ public class MongoOperations implements DatabaseOperations {
 			}
 
 		} catch (Exception e) {
-			System.out.println("Error : " + e.getMessage());
+			Logger.log("[ERROR] " + e.getMessage());
 		}
 
 		return allData;
 	}
 
+	/**
+	 * Get the count of documents in the table
+	 *
+	 * @param tablename The name of the table in the database
+	 * @return {@link int}
+	 */
 	public int getDocumentCount(String tablename) {
 		return this.getAllDatas(tablename).size();
 	}

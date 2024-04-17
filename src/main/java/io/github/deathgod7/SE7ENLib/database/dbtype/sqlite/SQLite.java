@@ -26,36 +26,71 @@ public class SQLite extends SQLOperations {
 	// old name = sqlite_master ( < 3.33.0 ) // works in all newer version
 	// new name = sqlite_schema ( >= 3.33.0 ) // won't work in older version
 
+	/**
+	 * Get the database name
+	 * @return {@link String}
+	 */
 	public String getDBName(){
 		return dbName;
 	}
 
+	/**
+	 * Check if the database is connected
+	 * @return {@link Boolean}
+	 */
 	public boolean isConnected(){
 		return (connection != null);
 	}
 
+	/**
+	 * Get the connection
+	 * @return {@link Connection}
+	 */
 	public Connection getConnection() {
-		return  connection;
+		return connection;
 	}
 
 	private final LinkedHashMap<String, Table> tables = new LinkedHashMap<>();
+
+	/**
+	 * Get the tables
+	 * @return {@link LinkedHashMap}
+	 */
 	public LinkedHashMap<String, Table> getTables() {
 		return tables;
 	}
 
+	/**
+	 * Add the table in table list
+	 * @param table {@link Table} The Table object to add
+	 */
 	public void addTable(Table table) {
 		tables.put(table.getName(), table);
 	}
 
+	/**
+	 * Remove the table from table list
+	 * @param tablename {@link String} The name of the table to remove
+	 */
 	public void removeTable(String tablename) {
 		tables.remove(tablename);
 	}
+
+	/**
+	 * Create a new SQLite object
+	 * @param dbName {@link String} The name of the database file
+	 * @param directory {@link String} The directory of the database file
+	 */
 	public SQLite(String dbName, String directory){
 		this.dbName = dbName;
 		this.dirDB = directory;
 		this.connection = connectSQLite();
 	}
 
+	/**
+	 * Create a new SQLite object
+	 * @param dbInfo {@link DatabaseInfo} The DatabaseInfo object
+	 */
 	public SQLite(DatabaseInfo dbInfo){
 		this.dbName = dbInfo.getDbName();
 		this.dirDB = dbInfo.getDirDb();
@@ -87,6 +122,9 @@ public class SQLite extends SQLOperations {
 		}
 	}
 
+	/**
+	 * Close the SQL connection
+	 */
 	public void closeConnection() {
 		if (isConnected()) {
 			try {
@@ -102,6 +140,9 @@ public class SQLite extends SQLOperations {
 		}
 	}
 
+	/**
+	 * Load the SQLite tables
+	 */
 	public void loadSqliteTables() {
 		String sqlitever;
 		int[] sqliteverformatted = new int[3];
@@ -145,7 +186,11 @@ public class SQLite extends SQLOperations {
 		}
 	}
 
-	// sqlite based querys
+	/**
+	 * Load the table from the database
+	 * @param tablename The name of the table
+	 * @return {@link Table}
+	 */
 	public Table loadTable(String tablename) {
 		// query all the column name and its type
 		// String query = "SELECT * FROM pragma_table_info('" + tablename +"');";

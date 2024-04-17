@@ -27,43 +27,66 @@ public class MongoDB extends MongoOperations {
 	private final String password;
 	private final String dbName;
 
+	/**
+	 * Get the database name
+	 * @return {@link String}
+	 */
 	public String getDBName(){
 		return dbName;
 	}
 
-	private MongoDatabase connection;
+	private final MongoDatabase connection;
+	/**
+	 * Get the connection
+	 * @return {@link MongoDatabase}
+	 */
 	public MongoDatabase getConnection(){
-		if (connection == null){
-			connection = connectMongoDB();
-			return connection;
-		}
 		return  connection;
 	}
-
+	/**
+	 * Check if the database is connected
+	 * @return {@link Boolean}
+	 */
+	public boolean isConnected(){
+		return (connection != null);
+	}
 	private final LinkedHashMap<String, Table> tables = new LinkedHashMap<>();
+	/**
+	 * Get the tables
+	 * @return {@link LinkedHashMap}
+	 */
 	public LinkedHashMap<String, Table> getTables() {
 		return tables;
 	}
 
+	/**
+	 * Add the table in table list
+	 * @param table The Table object to add
+	 */
 	public void addTable(Table table) {
 		tables.put(table.getName(), table);
 	}
 
+	/**
+	 * Remove the table from table list
+	 * @param tablename The name of the table to remove
+	 */
 	public void removeTable(String tablename) {
 		tables.remove(tablename);
 	}
+
+	/**
+	 * Creates a new MongoDB
+	 * @param dbinfo The DatabaseInfo object
+	 */
 	public MongoDB(DatabaseInfo dbinfo){
 		this.host = dbinfo.getHostAddress();
 		this.username = dbinfo.getUsername();
 		this.password = dbinfo.getPassword();
 		this.dbName = dbinfo.getDbName();
-
 		this.connection = connectMongoDB();
 	}
 
-	public boolean isConnected(){
-		return (connection != null);
-	}
 
 	// mongodb uri creator using srv
 	private String URICreator(String username, String password, String hostname) {
@@ -87,9 +110,13 @@ public class MongoDB extends MongoOperations {
 		}
 	}
 
+	/**
+	 * Load the tables from the database
+	 */
 	public void loadMongoTables() {
 		for (String tablename : this.getConnection().listCollectionNames()) {
 			tables.put(tablename, this.loadTable(tablename));
 		}
 	}
+
 }

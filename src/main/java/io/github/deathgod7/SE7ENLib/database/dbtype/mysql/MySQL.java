@@ -27,32 +27,59 @@ public class MySQL extends SQLOperations {
 	private final String password;
 	private final String dbName;
 
+	/**
+	 * Get the database name
+	 * @return {@link String}
+	 */
 	public String getDBName(){
 		return dbName;
 	}
 
 	private final Connection connection;
+	/**
+	 * Get the connection
+	 * @return {@link Connection}
+	 */
 	public Connection getConnection(){
-		if (connection == null){
-			//connection = connectSQLite();
-			return  connection;
-		}
-		return  connection;
+		return connection;
 	}
+	/**
+	 * Check if the database is connected
+	 * @return {@link Boolean}
+	 */
 	public boolean isConnected(){
 		return (connection != null);
 	}
 	private final LinkedHashMap<String, Table> tables = new LinkedHashMap<>();
+	/**
+	 * Get the tables
+	 * @return {@link LinkedHashMap}
+	 */
 	public LinkedHashMap<String, Table> getTables() {
 		return tables;
 	}
+	/**
+	 * Add the table in table list
+	 * @param table {@link Table}
+	 */
 	public void addTable(Table table) {
 		tables.put(table.getName(), table);
 	}
+	/**
+	 * Remove the table from table list
+	 * @param tablename {@link String}
+	 */
 	public void removeTable(String tablename) {
 		tables.remove(tablename);
 	}
 
+	/**
+	 * Create a new MySQL object
+	 * @param dbname {@link String}
+	 * @param host {@link String}
+	 * @param username {@link String}
+	 * @param password {@link String}
+	 */
 	public MySQL(String dbname, String host, String username, String password){
 		this.host = host;
 		this.username = username;
@@ -61,6 +88,10 @@ public class MySQL extends SQLOperations {
 		this.connection = connectMySQL();
 	}
 
+	/**
+	 * Create a new MySQL object
+	 * @param dbInfo {@link DatabaseInfo}
+	 */
 	public MySQL(DatabaseInfo dbInfo){
 		this.host = dbInfo.getHostAddress();
 		this.username = dbInfo.getUsername();
@@ -96,7 +127,9 @@ public class MySQL extends SQLOperations {
 		}
 	}
 
-
+	/**
+	 * Load the MySQL tables
+	 */
 	public void loadMysqlTables() {
 		String query = "SELECT table_name FROM information_schema.tables " +
 				"WHERE table_schema = '"+ this.getDBName() +"' AND table_type = 'base table' " +
@@ -113,6 +146,12 @@ public class MySQL extends SQLOperations {
 			ex.printStackTrace();
 		}
 	}
+
+	/**
+	 * Load the table from the database
+	 * @param tablename The name of the table
+	 * @return {@link Table}
+	 */
 	public Table loadTable(String tablename) {
 		// query all the column name and its type
 		String query = "SHOW COLUMNS FROM `" + tablename + "`;";

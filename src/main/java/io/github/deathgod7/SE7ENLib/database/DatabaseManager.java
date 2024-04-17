@@ -15,82 +15,204 @@ import java.util.*;
  */
 public class DatabaseManager {
 	private static DatabaseManager _dbmInstance;
+	/**
+	 * Get the instance of DatabaseManager
+	 * @return {@link DatabaseManager}
+	 */
 	public static DatabaseManager getInstance() {
 		return _dbmInstance;
 	}
 
 	private SQLite _sqlite;
+	/**
+	 * Get the SQLite
+	 * @return {@link SQLite}
+	 */
 	public SQLite getSQLite() { return this._sqlite; }
 	private MySQL _mysql;
+	/**
+	 * Get the MySQL
+	 * @return {@link MySQL}
+	 */
 	public MySQL getMySQL() { return this._mysql; }
 
 	private MongoDB _mongodb;
+	/**
+	 * Get the MongoDB
+	 * @return {@link MongoDB}
+	 */
 	public MongoDB getMongoDB() {
 		return this._mongodb;
 	}
 
 	private DatabaseInfo _dbInfo;
+
+	/**
+	 * Get the DatabaseInfo
+	 * @return {@link DatabaseInfo}
+	 */
 	public DatabaseInfo getDbInfo() {
 		return this._dbInfo;
 	}
 
+	/**
+	 * Check if the database is connected
+	 * @return {@link Boolean}
+	 */
 	public boolean isConnected() {
 		return (this.getConnection() != null);
 	}
 
-	public Object getConnection() {
-		if (_dbInfo.getDbType() == DatabaseType.SQLite) {
-			return  _sqlite.getConnection();
-		}
-		else if (_dbInfo.getDbType() == DatabaseType.MySQL){
-			// to do mysql support
-			return _mysql.getConnection();
-		} else if (_dbInfo.getDbType() == DatabaseType.MongoDB) {
-			return _mongodb.getConnection();
-		}
-		else {
-			return null;
-		}
+	private boolean debugMode = false;
+
+	/**
+	 * Set the debug mode
+	 * @param value The value to set
+	 */
+	public void setDebugMode(boolean value) {
+		this.debugMode = value;
 	}
 
+	/**
+	 * Check the debug mode
+	 * @return {@link Boolean}
+	 */
+	public boolean getDebugMode() {
+		return this.debugMode;
+	}
+
+	/**
+	 * Get the connection of database
+	 * @return {@link Object}
+	 */
+	public Object getConnection() {
+		if (_dbInfo.getDbType() == DatabaseType.SQLite) { return this.getSQLite().getConnection(); }
+		else if (_dbInfo.getDbType() == DatabaseType.MySQL){ return this.getMySQL().getConnection(); }
+		else if (_dbInfo.getDbType() == DatabaseType.MongoDB) { return this.getMongoDB().getConnection(); }
+		else { return null; }
+	}
+
+	/**
+	 * Get the database (all)
+	 * @return {@link Object}
+	 */
+	public Object getDatabase() {
+		if (_dbInfo.getDbType() == DatabaseType.SQLite) { return this.getSQLite(); }
+		else if (_dbInfo.getDbType() == DatabaseType.MySQL){ return this.getMySQL(); }
+		else if (_dbInfo.getDbType() == DatabaseType.MongoDB) { return this.getMongoDB(); }
+		else { return null; }
+	}
+
+	/**
+	 * Get the database name
+	 * @return {@link String}
+	 */
 	public String getDBName() {
 		return this._dbInfo.getDbName();
 	}
 
+	/**
+	 * Represents the Data Type
+	 */
 	public enum DataType {
+		/**
+		 * Varchar Data Type
+		 */
 		VARCHAR,
+		/**
+		 * Text Data Type
+		 */
 		TEXT,
+		/**
+		 * Integer Data Type
+		 */
 		INTEGER,
+		/**
+		 * Boolean Data Type
+		 */
 		BOOLEAN,
+		/**
+		 * Float Data Type
+		 */
 		FLOAT,
+		/**
+		 * Double Data Type
+		 */
 		DOUBLE,
+		/**
+		 * Date Data Type
+		 */
 		DATE,
+		/**
+		 * Time Data Type
+		 */
 		TIME,
+		/**
+		 * DateTime Data Type
+		 */
 		DATETIME,
 
 		// MongoDB Special
+		/**
+		 * Array Data Type
+		 */
 		ARRAY,
+		/**
+		 * Document Data Type
+		 */
 		DOCUMENT,
+		/**
+		 * ObjectID Data Type
+		 */
 		OBJECTID
 	}
 
+	/**
+	 * Represents the Order Type
+	 */
 	public enum OrderType {
+		/**
+		 * Ascending Order
+		 */
 		ASCENDING,
+		/**
+		 * Descending Order
+		 */
 		DESCENDING
 	}
 
+	/**
+	 * Represents the Database Type
+	 */
 	public enum DatabaseType {
+		/**
+		 * SQLite Database
+		 */
 		MySQL,
+		/**
+		 * MySQL Database
+		 */
 		SQLite,
+		/**
+		 * MongoDB Database
+		 */
 		MongoDB
 	}
 
+	/**
+	 * DatabaseManager constructor that takes DatabaseInfo
+	 * @param dbinfo The DatabaseInfo object
+	 */
 	public DatabaseManager(DatabaseInfo dbinfo){
 		_dbmInstance = this;
 		loadDB(dbinfo);
 	}
 
-
+	/**
+	 * Close the SQL connection
+	 * @param ps The PreparedStatement
+	 * @param rs The ResultSet
+	 */
 	public void closeConnection(PreparedStatement ps, ResultSet rs) {
 		try {
 			if (ps != null)
@@ -102,6 +224,10 @@ public class DatabaseManager {
 		}
 	}
 
+	/**
+	 * Load the database based on the DatabaseInfo
+	 * @param dbinfo The DatabaseInfo object provided while creating instance of this class
+	 */
 	private void loadDB(DatabaseInfo dbinfo) {
 		_dbInfo = dbinfo;
 
@@ -123,6 +249,10 @@ public class DatabaseManager {
 		}
 	}
 
+	/**
+	 * Get the tables from the database
+	 * @return {@link LinkedHashMap}
+	 */
 	public LinkedHashMap<String, Table> getTables() {
 		if (_dbInfo.getDbType() == DatabaseType.SQLite) {
 			return _sqlite.getTables();

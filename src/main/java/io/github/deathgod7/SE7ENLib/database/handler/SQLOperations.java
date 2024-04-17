@@ -4,6 +4,7 @@
 
 package io.github.deathgod7.SE7ENLib.database.handler;
 
+import io.github.deathgod7.SE7ENLib.Logger;
 import io.github.deathgod7.SE7ENLib.database.DatabaseManager;
 import io.github.deathgod7.SE7ENLib.database.DatabaseManager.DataType;
 import io.github.deathgod7.SE7ENLib.database.DatabaseManager.DatabaseType;
@@ -133,7 +134,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 		// end closing
 		query.replace(query.length() - 2, query.length(), ");");
 
-		System.out.println(query);
+		Logger.log("[QUERY] " + query);
 
 		try {
 			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
@@ -168,6 +169,8 @@ public abstract class SQLOperations implements DatabaseOperations {
 	@Override
 	public boolean dropTable(String tablename) {
 		StringBuilder query = new StringBuilder("DROP TABLE IF EXISTS `" + tablename + "`;");
+
+		Logger.log("[QUERY] " + query);
 
 		try {
 			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
@@ -221,6 +224,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 			}
 			query.append(";");
 
+			Logger.log("[QUERY] " + query);
 
 			try {
 				Connection con = (Connection) DatabaseManager.getInstance().getConnection();
@@ -286,13 +290,12 @@ public abstract class SQLOperations implements DatabaseOperations {
 							break;
 					}
 				}
-				System.out.println(s);
 
 				s.executeUpdate();
 				s.close();
 				return true;
 			} catch (SQLException e) {
-				e.printStackTrace();
+				Logger.log("[ERROR] " + e.getMessage());
 				return false;
 			}
 		}
@@ -333,7 +336,8 @@ public abstract class SQLOperations implements DatabaseOperations {
 		}
 		query.append(";");
 
-		System.out.println(query);
+		Logger.log("[QUERY] " + query);
+
 		try {
 			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
 			PreparedStatement s = con.prepareStatement(query.toString());
@@ -341,7 +345,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 			s.close();
 			return true;
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Logger.log("[ERROR] " + e.getMessage());
 			return false;
 		}
 
@@ -357,6 +361,9 @@ public abstract class SQLOperations implements DatabaseOperations {
 	@Override
 	public boolean deleteData(String tablename, Column primaryKey) {
 		String query = "DELETE FROM `" + tablename + "` WHERE `" + primaryKey.getName() + "` = ?";
+
+		Logger.log("[QUERY] " + query);
+
 		try {
 			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
 			PreparedStatement s = con.prepareStatement(query);
@@ -423,7 +430,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 			s.close();
 			return true;
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Logger.log("[ERROR] " + e.getMessage());
 			return false;
 		}
 	}
@@ -443,6 +450,8 @@ public abstract class SQLOperations implements DatabaseOperations {
 		if (primaryKey.getDataType() == DataType.FLOAT) {
 			query = query.replace("= ?", "LIKE ?");
 		}
+
+		Logger.log("[QUERY] " + query);
 
 		try {
 			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
@@ -509,11 +518,10 @@ public abstract class SQLOperations implements DatabaseOperations {
 			}
 
 			ResultSet rs = s.executeQuery();
-			// System.out.println(s.toString());
 
 			// primary key and so on
-			List<Column> allTableCols = table.getColumns();
-			allTableCols.add(0, table.getPrimaryKey());
+			List<Column> allTableCols = new ArrayList<>(table.getColumns());
+			allTableCols.add(0, primaryKey);
 
 			// if there is result found then proceed
 			if (rs.next()) {
@@ -524,8 +532,6 @@ public abstract class SQLOperations implements DatabaseOperations {
 								allTableCols.get(i).getDataType(),
 								allTableCols.get(i).getLimit()
 						);
-
-						// System.out.println(rCol.getName() + " = " + rs.getString(i+1));
 
 						switch (rCol.getDataType()) {
 							case VARCHAR:
@@ -561,11 +567,11 @@ public abstract class SQLOperations implements DatabaseOperations {
 					DatabaseManager.getInstance().closeConnection(s, rs);
 				} catch (SQLException e) {
 					s.close();
-					e.printStackTrace();
+					Logger.log("[ERROR] " + e.getMessage());
 				}
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Logger.log("[ERROR] " + e.getMessage());
 		}
 
 		return result;
@@ -586,6 +592,8 @@ public abstract class SQLOperations implements DatabaseOperations {
 		if (column.getDataType() == DataType.FLOAT) {
 			query = query.replace("= ?", "LIKE ?");
 		}
+
+		Logger.log("[QUERY] " + query);
 
 		try {
 			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
@@ -652,7 +660,6 @@ public abstract class SQLOperations implements DatabaseOperations {
 			}
 
 			ResultSet rs = s.executeQuery();
-			// System.out.println(s.toString());
 
 			// primary key and so on
 			List<Column> allTableCols = table.getColumns();
@@ -666,8 +673,6 @@ public abstract class SQLOperations implements DatabaseOperations {
 							allTableCols.get(i).getDataType(),
 							allTableCols.get(i).getLimit()
 					);
-
-					// System.out.println(rCol.getName() + " = " + rs.getString(i+1));
 
 					// set value
 					switch (rCol.getDataType()) {
@@ -703,7 +708,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 			}
 			DatabaseManager.getInstance().closeConnection(s, rs);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Logger.log("[ERROR] " + e.getMessage());
 		}
 
 		return results;
@@ -721,6 +726,8 @@ public abstract class SQLOperations implements DatabaseOperations {
 		Table table = DatabaseManager.getInstance().getTables().get(tablename);
 		String query = "SELECT * FROM `" + tablename + "`;";
 		try {
+			Logger.log("[QUERY] " + query);
+
 			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
 			PreparedStatement s = con.prepareStatement(query);
 			ResultSet rs = s.executeQuery();
@@ -774,7 +781,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 			// close both PS and RS
 			DatabaseManager.getInstance().closeConnection(s, rs);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Logger.log("[ERROR] " + e.getMessage());
 		}
 		return allDatas;
 	}
