@@ -22,7 +22,7 @@ public class MySQL_Test {
 	//@Disabled
 	@DisplayName("Test : MySQL database")
 	public void MySQLDatabaseConnection() {
-		DatabaseInfo dbInfo = new DatabaseInfo("test", "http://localhost", "root", "", DatabaseManager.DatabaseType.MySQL);
+		DatabaseInfo dbInfo = new DatabaseInfo("test", "http://localhost", "root", "", DatabaseManager.DatabaseType.MySQL, null);
 		DatabaseManager dbManager = new DatabaseManager(dbInfo);
 
 		MySQL db = dbManager.getMySQL();

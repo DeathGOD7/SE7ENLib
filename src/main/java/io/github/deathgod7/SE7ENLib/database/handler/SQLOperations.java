@@ -155,7 +155,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 
 			}
 		} catch (SQLException ex) {
-			ex.printStackTrace();
+			Logger.log("[ERROR] " + ex.getMessage());
 			return false;
 		}
 	}
@@ -191,7 +191,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 
 			}
 		} catch (SQLException ex) {
-			ex.printStackTrace();
+			Logger.log("[ERROR] " + ex.getMessage());
 			return false;
 		}
 	}
@@ -254,7 +254,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 								s.setDate(i + 1, date);
 							}
 							catch (ParseException ex) {
-								ex.printStackTrace();
+								Logger.log("[ERROR] " + ex.getMessage());
 							}
 							break;
 						case TIME:
@@ -268,7 +268,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 								s.setTime(i + 1, time);
 							}
 							catch (ParseException ex) {
-								ex.printStackTrace();
+								Logger.log("[ERROR] " + ex.getMessage());
 							}
 							break;
 						case DATETIME:
@@ -282,7 +282,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 								s.setTimestamp(i + 1, timestamp);
 							}
 							catch (ParseException ex) {
-								ex.printStackTrace();
+								Logger.log("[ERROR] " + ex.getMessage());
 							}
 							break;
 						default:
@@ -391,7 +391,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 						s.setDate(1, date);
 					}
 					catch (ParseException ex) {
-						ex.printStackTrace();
+						Logger.log("[ERROR] " + ex.getMessage());
 					}
 					break;
 				case TIME:
@@ -405,7 +405,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 						s.setTime(1, time);
 					}
 					catch (ParseException ex) {
-						ex.printStackTrace();
+						Logger.log("[ERROR] " + ex.getMessage());
 					}
 					break;
 				case DATETIME:
@@ -419,7 +419,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 						s.setTimestamp(1, timestamp);
 					}
 					catch (ParseException ex) {
-						ex.printStackTrace();
+						Logger.log("[ERROR] " + ex.getMessage());
 					}
 					break;
 				default:
@@ -481,7 +481,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 						s.setDate(1, date);
 					}
 					catch (ParseException ex) {
-						ex.printStackTrace();
+						Logger.log("[ERROR] " + ex.getMessage());
 					}
 					break;
 				case TIME:
@@ -495,7 +495,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 						s.setTime(1, time);
 					}
 					catch (ParseException ex) {
-						ex.printStackTrace();
+						Logger.log("[ERROR] " + ex.getMessage());
 					}
 					break;
 				case DATETIME:
@@ -509,7 +509,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 						s.setTimestamp(1, timestamp);
 					}
 					catch (ParseException ex) {
-						ex.printStackTrace();
+						Logger.log("[ERROR] " + ex.getMessage());
 					}
 					break;
 				default:
@@ -623,7 +623,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 						s.setDate(1, date);
 					}
 					catch (ParseException ex) {
-						ex.printStackTrace();
+						Logger.log("[ERROR] " + ex.getMessage());
 					}
 					break;
 				case TIME:
@@ -637,7 +637,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 						s.setTime(1, time);
 					}
 					catch (ParseException ex) {
-						ex.printStackTrace();
+						Logger.log("[ERROR] " + ex.getMessage());
 					}
 					break;
 				case DATETIME:
@@ -651,7 +651,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 						s.setTimestamp(1, timestamp);
 					}
 					catch (ParseException ex) {
-						ex.printStackTrace();
+						Logger.log("[ERROR] " + ex.getMessage());
 					}
 					break;
 				default:

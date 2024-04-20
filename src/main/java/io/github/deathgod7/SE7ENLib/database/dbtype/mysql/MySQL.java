@@ -1,7 +1,10 @@
 package io.github.deathgod7.SE7ENLib.database.dbtype.mysql;
 
+import io.github.deathgod7.SE7ENLib.Logger;
 import io.github.deathgod7.SE7ENLib.database.DatabaseInfo;
+import io.github.deathgod7.SE7ENLib.database.DatabaseManager.DatabaseType;
 import io.github.deathgod7.SE7ENLib.database.DatabaseManager.DataType;
+import io.github.deathgod7.SE7ENLib.database.PoolSettings;
 import io.github.deathgod7.SE7ENLib.database.handler.SQLOperations;
 import io.github.deathgod7.SE7ENLib.database.component.Column;
 import io.github.deathgod7.SE7ENLib.database.component.Table;
@@ -26,6 +29,16 @@ public class MySQL extends SQLOperations {
 	private final String username;
 	private final String password;
 	private final String dbName;
+
+	private final DatabaseInfo dbInfo;
+
+	/**
+	 * Get the database information
+	 * @return {@link DatabaseInfo}
+	 */
+	public DatabaseInfo getDbInfo() {
+		return dbInfo;
+	}
 
 	/**
 	 * Get the database name
@@ -85,6 +98,7 @@ public class MySQL extends SQLOperations {
 		this.username = username;
 		this.password = password;
 		this.dbName = dbname;
+		this.dbInfo = new DatabaseInfo(dbname, host, username, password, DatabaseType.MySQL, null);
 		this.connection = connectMySQL();
 	}
 
@@ -93,6 +107,7 @@ public class MySQL extends SQLOperations {
 	 * @param dbInfo {@link DatabaseInfo}
 	 */
 	public MySQL(DatabaseInfo dbInfo){
+		this.dbInfo = dbInfo;
 		this.host = dbInfo.getHostAddress();
 		this.username = dbInfo.getUsername();
 		this.password = dbInfo.getPassword();
@@ -113,6 +128,17 @@ public class MySQL extends SQLOperations {
 		config.addDataSourceProperty("prepStmtCacheSize", "250");
 		config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
 
+		// enable auto reconnect ??
+		config.addDataSourceProperty("autoReconnect", "true");
+
+		PoolSettings poolSettings = this.dbInfo.getPoolSettings();
+		if (poolSettings != null) {
+			config.setMaximumPoolSize(poolSettings.getMaxPoolSize());
+			config.setIdleTimeout(poolSettings.getIdleTimeout());
+			config.setConnectionTimeout(poolSettings.getConnectionTimeout());
+			config.setMaxLifetime(poolSettings.getMaxLifetime());
+		}
+
 		try {
 			if (connection != null && !connection.isClosed()) {
 				return connection;
@@ -122,7 +148,7 @@ public class MySQL extends SQLOperations {
 			temp = dataSource.getConnection();
 			return temp;
 		} catch (SQLException ex) {
-			ex.printStackTrace();
+			Logger.log("[ERROR] " + ex.getMessage());
 			return null;
 		}
 	}
@@ -143,7 +169,7 @@ public class MySQL extends SQLOperations {
 			}
 			ps.close();
 		} catch (SQLException ex) {
-			ex.printStackTrace();
+			Logger.log("[ERROR] " + ex.getMessage());
 		}
 	}
 
@@ -187,7 +213,7 @@ public class MySQL extends SQLOperations {
 			ps.close();
 		}
 		catch (SQLException ex) {
-			ex.printStackTrace();
+			Logger.log("[ERROR] " + ex.getMessage());
 			return null;
 		}
 

@@ -35,6 +35,16 @@ public class MongoDB extends MongoOperations {
 		return dbName;
 	}
 
+	private final DatabaseInfo dbInfo;
+
+	/**
+	 * Get the database information
+	 * @return {@link DatabaseInfo}
+	 */
+	public DatabaseInfo getDbInfo() {
+		return dbInfo;
+	}
+
 	private final MongoDatabase connection;
 	/**
 	 * Get the connection
@@ -80,6 +90,7 @@ public class MongoDB extends MongoOperations {
 	 * @param dbinfo The DatabaseInfo object
 	 */
 	public MongoDB(DatabaseInfo dbinfo){
+		this.dbInfo = dbinfo;
 		this.host = dbinfo.getHostAddress();
 		this.username = dbinfo.getUsername();
 		this.password = dbinfo.getPassword();

@@ -1,5 +1,6 @@
 package io.github.deathgod7.SE7ENLib.database.dbtype.sqlite;
 
+import io.github.deathgod7.SE7ENLib.Logger;
 import io.github.deathgod7.SE7ENLib.database.DatabaseInfo;
 import io.github.deathgod7.SE7ENLib.database.DatabaseManager;
 import io.github.deathgod7.SE7ENLib.database.handler.SQLOperations;
@@ -33,6 +34,17 @@ public class SQLite extends SQLOperations {
 	public String getDBName(){
 		return dbName;
 	}
+
+	private final DatabaseInfo dbInfo;
+
+	/**
+	 * Get the database information
+	 * @return {@link DatabaseInfo}
+	 */
+	public DatabaseInfo getDbInfo() {
+		return dbInfo;
+	}
+
 
 	/**
 	 * Check if the database is connected
@@ -85,6 +97,7 @@ public class SQLite extends SQLOperations {
 		this.dbName = dbName;
 		this.dirDB = directory;
 		this.connection = connectSQLite();
+		this.dbInfo = new DatabaseInfo(dbName, directory);
 	}
 
 	/**
@@ -92,6 +105,7 @@ public class SQLite extends SQLOperations {
 	 * @param dbInfo {@link DatabaseInfo} The DatabaseInfo object
 	 */
 	public SQLite(DatabaseInfo dbInfo){
+		this.dbInfo = dbInfo;
 		this.dbName = dbInfo.getDbName();
 		this.dirDB = dbInfo.getDirDb();
 		this.connection = connectSQLite();
@@ -103,9 +117,13 @@ public class SQLite extends SQLOperations {
 
 		if (!dbFile.exists()) {
 			try {
-				dbFile.createNewFile();
+				boolean filecreate = dbFile.createNewFile();
+				if (!filecreate) {
+					Logger.log("[ERROR] Unable to create database file");
+				}
+
 			} catch (IOException ex) {
-				ex.printStackTrace();
+				Logger.log("[ERROR] " + ex.getMessage());
 			}
 		}
 
@@ -117,7 +135,7 @@ public class SQLite extends SQLOperations {
 			temp = DriverManager.getConnection("jdbc:sqlite:" + dbFile);
 			return temp;
 		} catch (SQLException | ClassNotFoundException ex) {
-			ex.printStackTrace();
+			Logger.log("[ERROR] " + ex.getMessage());
 			return null;
 		}
 	}
@@ -130,12 +148,10 @@ public class SQLite extends SQLOperations {
 			try {
 				if (!(connection.isClosed())) {
 					connection.close();
-					connection = null;
-				} else {
-					connection = null;
 				}
+				connection = null;
 			} catch (SQLException ex) {
-				ex.printStackTrace();
+				Logger.log("[ERROR] " + ex.getMessage());
 			}
 		}
 	}
@@ -163,7 +179,7 @@ public class SQLite extends SQLOperations {
 				ps.close();
 			}
 		} catch (SQLException ex) {
-			ex.printStackTrace();
+			Logger.log("[ERROR] " + ex.getMessage());
 		}
 
 		// old name = sqlite_master ( < 3.33.0 ) // works in all newer version
@@ -182,7 +198,7 @@ public class SQLite extends SQLOperations {
 			}
 			ps.close();
 		} catch (SQLException ex) {
-			ex.printStackTrace();
+			Logger.log("[ERROR] " + ex.getMessage());
 		}
 	}
 
@@ -223,7 +239,7 @@ public class SQLite extends SQLOperations {
 			ps.close();
 		}
 		catch (SQLException ex) {
-			ex.printStackTrace();
+			Logger.log("[ERROR] " + ex.getMessage());
 			return null;
 		}
 

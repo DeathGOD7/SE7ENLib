@@ -4,6 +4,7 @@
 
 package io.github.deathgod7.SE7ENLib.database;
 
+
 /**
  * Represents the Database Information
  * @version 1.0
@@ -72,6 +73,15 @@ public class DatabaseInfo {
 		return _dirDB;
 	}
 
+	private PoolSettings _poolSettings;
+	/**
+	 * Returns the pool settings
+	 * @return {@link PoolSettings}
+	 */
+	public PoolSettings getPoolSettings() {
+		return _poolSettings;
+	}
+
 	/**
 	 * Database Info constructor for SQLite database
 	 * @param dbname name of the database file
@@ -91,14 +101,16 @@ public class DatabaseInfo {
 	 * @param username username used to login into the databse
 	 * @param password password of the given username
 	 * @param dbtype type of database
+	 * @param poolSettings pool settings
 	 * @since 1.0
 	 */
-	public DatabaseInfo(String dbname, String host, String username, String password, DatabaseManager.DatabaseType dbtype) {
+	public DatabaseInfo(String dbname, String host, String username, String password, DatabaseManager.DatabaseType dbtype, PoolSettings poolSettings) {
 		_dbType = dbtype;
 		_dbName = dbname;
 		_hostAddress = host;
 		_username = username;
 		_password = password;
+		_poolSettings = poolSettings;
 	}
 
 }

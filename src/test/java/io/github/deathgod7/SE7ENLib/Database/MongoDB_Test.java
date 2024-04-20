@@ -29,7 +29,7 @@ public class MongoDB_Test {
 		final String username = Dotenv.load().get("MONGO_USERNAME");
 		final String password = Dotenv.load().get("MONGO_PASSWORD");
 
-		DatabaseInfo dbInfo = new DatabaseInfo("sample_training", host, username, password, DatabaseType.MongoDB);
+		DatabaseInfo dbInfo = new DatabaseInfo("sample_training", host, username, password, DatabaseType.MongoDB, null);
 		DatabaseManager dbManager = new DatabaseManager(dbInfo);
 
 		MongoDB mongo = dbManager.getMongoDB();
