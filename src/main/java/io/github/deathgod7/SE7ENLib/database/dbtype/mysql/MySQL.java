@@ -48,20 +48,31 @@ public class MySQL extends SQLOperations {
 		return dbName;
 	}
 
-	private final Connection connection;
+	private Connection connection;
 	/**
 	 * Get the connection
 	 * @return {@link Connection}
 	 */
 	public Connection getConnection(){
+		if (!isConnected()) {
+			connection = connectMySQL();
+		}
+
 		return connection;
 	}
+
 	/**
 	 * Check if the database is connected
 	 * @return {@link Boolean}
 	 */
 	public boolean isConnected(){
-		return (connection != null);
+		try {
+			return (connection != null && connection.isValid(2));
+		} catch (SQLException e) {
+			Logger.log("[ERROR] " + e.getMessage());
+			return false;
+		}
+
 	}
 	private final LinkedHashMap<String, Table> tables = new LinkedHashMap<>();
 	/**
@@ -120,7 +131,7 @@ public class MySQL extends SQLOperations {
 		String cleanedUrl = this.host.replaceFirst("^(https?://)?", "");
 		Connection temp;
 
-		config.setJdbcUrl("jdbc:mysql://" + cleanedUrl + "/" + this.dbName);
+		config.setJdbcUrl("jdbc:mysql://" + cleanedUrl + "/" + this.dbName + "?autoReconnect=true");
 		config.setUsername(this.username);
 		config.setPassword(this.password);
 		//config.setDriverClassName("com.mysql.cj.jdbc.Driver");

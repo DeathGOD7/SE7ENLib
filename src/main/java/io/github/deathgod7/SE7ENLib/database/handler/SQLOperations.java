@@ -73,6 +73,15 @@ public abstract class SQLOperations implements DatabaseOperations {
 	}
 
 	/**
+	 * Sanitize the string to avoid sql injection
+	 * @param string The string to clean with holy water
+	 * @return {@link String}
+	 */
+	public String sanitizeSQLQuery(String string) {
+		return string.replaceAll("[^a-zA-Z0-9_]", "");
+	}
+
+	/**
 	 * Parse the {@link DataType} to string
 	 *
 	 * @param dataType The data type
@@ -110,9 +119,11 @@ public abstract class SQLOperations implements DatabaseOperations {
 	 */
 	@Override
 	public boolean createTable(Table table, DatabaseType dbtype) {
-		StringBuilder query = new StringBuilder("CREATE TABLE IF NOT EXISTS `" + table.getName() + "` (");
+		String safeTableName = this.sanitizeSQLQuery(table.getName());
+		StringBuilder query = new StringBuilder("CREATE TABLE IF NOT EXISTS `" + safeTableName + "` (");
 		// primary key columns
-		query.append("`").append(table.getPrimaryKey().getName()).append("` ");
+		String safePrimaryKeyName = this.sanitizeSQLQuery(table.getPrimaryKey().getName());
+		query.append("`").append(safePrimaryKeyName).append("` ");
 		query.append(this.parseInputDataType(table.getPrimaryKey().getDataType()));
 		query.append(table.getPrimaryKey().getLimit() > 0 ? " (" + table.getPrimaryKey().getLimit() + ")" : "");
 		query.append(" PRIMARY KEY");
@@ -125,7 +136,8 @@ public abstract class SQLOperations implements DatabaseOperations {
 		query.append(", ");
 		// remaining columns
 		for (Column column : table.getColumns()) {
-			query.append("`").append(column.getName()).append("` ");
+			String safeColName = this.sanitizeSQLQuery(column.getName());
+			query.append("`").append(safeColName).append("` ");
 			query.append(this.parseInputDataType(column.getDataType()));
 			query.append(column.getLimit() > 0 ? " (" + column.getLimit() + ")" : "");
 			query.append(column.getDefaultValue() != null ? " DEFAULT '" + column.getDefaultValue() + "'" : "");
@@ -168,7 +180,8 @@ public abstract class SQLOperations implements DatabaseOperations {
 	 */
 	@Override
 	public boolean dropTable(String tablename) {
-		StringBuilder query = new StringBuilder("DROP TABLE IF EXISTS `" + tablename + "`;");
+		String safeTableName = this.sanitizeSQLQuery(tablename);
+		StringBuilder query = new StringBuilder("DROP TABLE IF EXISTS `" + safeTableName + "`;");
 
 		Logger.log("[QUERY] " + query);
 
@@ -206,12 +219,14 @@ public abstract class SQLOperations implements DatabaseOperations {
 	@Override
 	public boolean insertData(String tablename, List<Column> columns) {
 		if (columns != null) {
-			StringBuilder query = new StringBuilder("INSERT INTO `" + tablename + "` (");
+			String safeTableName = this.sanitizeSQLQuery(tablename);
+			StringBuilder query = new StringBuilder("INSERT INTO `" + safeTableName + "` (");
 			for (Column column : columns) {
+				String safeColumnName = this.sanitizeSQLQuery(column.getName());
 				if (columns.indexOf(column) < columns.size() - 1) {
-					query.append("`").append(column.getName()).append("`, ");
+					query.append("`").append(safeColumnName).append("`, ");
 				} else {
-					query.append("`").append(column.getName()).append("`) ");
+					query.append("`").append(safeColumnName).append("`) ");
 				}
 			}
 			query.append("VALUES (");
@@ -314,13 +329,16 @@ public abstract class SQLOperations implements DatabaseOperations {
 	 */
 	@Override
 	public boolean updateData(String tablename, Column primaryKey, List<Column> columns) {
-		StringBuilder query = new StringBuilder("UPDATE `" + tablename + "` SET ");
+		String safeTableName = this.sanitizeSQLQuery(tablename);
+		StringBuilder query = new StringBuilder("UPDATE `" + safeTableName + "` SET ");
 
 		for (Column column : columns) {
+			String safeColumnName = this.sanitizeSQLQuery(column.getName());
+
 			if (column.getDataType() == DataType.VARCHAR || column.getDataType() == DataType.TEXT) {
-				query.append("`").append(column.getName()).append("`='").append(column.getValue().toString()).append("'");
+				query.append("`").append(safeColumnName).append("`='").append(column.getValue().toString()).append("'");
 			} else {
-				query.append("`").append(column.getName()).append("`=").append(column.getValue().toString());
+				query.append("`").append(safeColumnName).append("`=").append(column.getValue().toString());
 			}
 			if (columns.indexOf(column) == columns.size() - 1) {
 				query.append(" ");
@@ -328,7 +346,8 @@ public abstract class SQLOperations implements DatabaseOperations {
 				query.append(", ");
 			}
 		}
-		query.append("WHERE `").append(primaryKey.getName()).append("` = ");
+		String safePrimaryKey = this.sanitizeSQLQuery(primaryKey.getName());
+		query.append("WHERE `").append(safePrimaryKey).append("` = ");
 		if (primaryKey.getDataType() == DataType.VARCHAR || primaryKey.getDataType() == DataType.TEXT) {
 			query.append("'").append(primaryKey.getValue().toString()).append("'");
 		} else {
@@ -360,7 +379,8 @@ public abstract class SQLOperations implements DatabaseOperations {
 	 */
 	@Override
 	public boolean deleteData(String tablename, Column primaryKey) {
-		String query = "DELETE FROM `" + tablename + "` WHERE `" + primaryKey.getName() + "` = ?";
+		String safeTableName = this.sanitizeSQLQuery(tablename);
+		String query = "DELETE FROM `" + safeTableName + "` WHERE `" + primaryKey.getName() + "` = ?";
 
 		Logger.log("[QUERY] " + query);
 
@@ -443,7 +463,8 @@ public abstract class SQLOperations implements DatabaseOperations {
 	@Override
 	public List<Column> getExactData(String tablename, Column primaryKey) {
 		List<Column> result = new ArrayList<>();
-		Table table = DatabaseManager.getInstance().getTables().get(tablename);
+		String safeTableName = this.sanitizeSQLQuery(tablename);
+		Table table = DatabaseManager.getInstance().getTables().get(safeTableName);
 		String query = "SELECT * FROM `" + tablename + "` WHERE `" + primaryKey.getName() + "` = ?;";
 
 		// float being weird
@@ -585,8 +606,9 @@ public abstract class SQLOperations implements DatabaseOperations {
 	@Override
 	public List<List<Column>> findData(String tablename, Column column) {
 		List<List<Column>> results = new ArrayList<>();
-		Table table = DatabaseManager.getInstance().getTables().get(tablename);
-		String query = "SELECT * FROM `" + tablename + "` WHERE `" + column.getName() + "` = ?;";
+		String safeTableName = this.sanitizeSQLQuery(tablename);
+		Table table = DatabaseManager.getInstance().getTables().get(safeTableName);
+		String query = "SELECT * FROM `" + safeTableName + "` WHERE `" + column.getName() + "` = ?;";
 
 		// float being weird
 		if (column.getDataType() == DataType.FLOAT) {
@@ -723,8 +745,9 @@ public abstract class SQLOperations implements DatabaseOperations {
 	@Override
 	public List<List<Column>> getAllDatas(String tablename) {
 		List<List<Column>> allDatas = new ArrayList<>();
+		String safeTableName = this.sanitizeSQLQuery(tablename);
 		Table table = DatabaseManager.getInstance().getTables().get(tablename);
-		String query = "SELECT * FROM `" + tablename + "`;";
+		String query = "SELECT * FROM `" + safeTableName + "`;";
 		try {
 			Logger.log("[QUERY] " + query);
 
