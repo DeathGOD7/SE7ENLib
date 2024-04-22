@@ -15,8 +15,6 @@ group = "io.github.deathgod7.SE7ENLib"
 version = "1.1.1-rc1"
 description = "A lib to aid in development for my java stuff."
 
-
-
 repositories {
     mavenLocal()
     mavenCentral()
@@ -110,7 +108,7 @@ tasks.withType<JavaCompile> {
     options.compilerArgs.add("-Xlint:unchecked")
 }
 
-extra["isReleaseVersion"] = !version.toString().endsWith("SNAPSHOT")
+extra["isReleaseVersion"] = !(version.toString().endsWith("SNAPSHOT") || version.toString().contains("-rc"))
 extra["groupID"] = "io.github.deathgod7"
 extra["artifactID"] = "SE7ENLib"
 
