@@ -1,22 +1,15 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import com.vanniktech.maven.publish.JavaLibrary
-import com.vanniktech.maven.publish.JavadocJar
-import com.vanniktech.maven.publish.SonatypeHost
 
 plugins {
     id("java")
     id("maven-publish")
 	id("signing")
     id("com.github.johnrengelman.shadow") version "8.1.1"
-	id("com.vanniktech.maven.publish") version "0.28.0"
 }
 
 group = "io.github.deathgod7.SE7ENLib"
-version = "1.1.0"
-//version = "1.1.0-SNAPSHOT"
+version = "1.1.0-SNAPSHOT"
 description = "A lib to aid in development for my java stuff."
-
-
 
 repositories {
     mavenLocal()
@@ -111,53 +104,77 @@ tasks.withType<JavaCompile> {
     options.compilerArgs.add("-Xlint:unchecked")
 }
 
+// for publishing the library
+val sourcesJar by tasks.registering(Jar::class) {
+    from(sourceSets["main"].allJava)
+    archiveClassifier.set("sources")
+}
+
+val javadocJar by tasks.registering(Jar::class) {
+    from(tasks.javadoc)
+    archiveClassifier.set("javadoc")
+}
+
+
 extra["isReleaseVersion"] = !version.toString().endsWith("SNAPSHOT")
 extra["groupID"] = "io.github.deathgod7"
 extra["artifactID"] = "SE7ENLib"
 
-mavenPublishing {
-	configure(JavaLibrary(
-			javadocJar = JavadocJar.Javadoc(),
-			sourcesJar = true,
-	))
 
-	publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
-
-	signAllPublications()
-
-	coordinates(project.extra["groupID"].toString(), project.extra["artifactID"].toString(), project.version.toString())
-
-	pom {
-		name = "SE7ENLib"
-		description = project.description.toString()
-		url = "https://github.com/DeathGOD7/SE7ENLib"
-		properties = mapOf(
-				"release-type" to if (project.extra["isReleaseVersion"] as Boolean) "PUBLIC RELEASE" else "SNAPSHOT RELEASE"
-		)
-		licenses {
-			license {
-				name = "GNU GENERAL PUBLIC LICENSE 3.0"
-				url = "https://www.gnu.org/licenses/gpl-3.0.en.html"
+publishing {
+	repositories {
+		maven {
+			name = "GitHubPackages"
+			url = uri("https://maven.pkg.github.com/DeathGOD7/SE7ENLib")
+			credentials {
+				username = System.getenv("GITHUB_USERNAME") ?: ""
+				password = System.getenv("GITHUB_TOKEN") ?: ""
 			}
-		}
-		developers {
-			developer {
-				id = "deathgod7"
-				name = "Death GOD 7"
-				email = "laxneshlovecfc@gmail.com"
-			}
-		}
-		scm {
-			url = "https://github.com/DeathGOD7/SE7ENLib.git"
 		}
 	}
+	publications {
+		create<MavenPublication>("mavenJava") {
+			groupId = "io.github.deathgod7"
+			artifactId = "se7enlib"
+			version = project.version.toString()
+			description = project.description.toString()
 
+			from(components["java"])
+			artifact(sourcesJar)
+			artifact(javadocJar)
+
+			pom {
+				name = "SE7ENLib"
+				description = project.description.toString()
+				url = "https://github.com/DeathGOD7/SE7ENLib"
+				properties = mapOf(
+						"release-type" to if (project.extra["isReleaseVersion"] as Boolean) "PUBLIC RELEASE" else "SNAPSHOT RELEASE"
+				)
+				licenses {
+					license {
+						name = "GNU GENERAL PUBLIC LICENSE 3.0"
+						url = "https://www.gnu.org/licenses/gpl-3.0.en.html"
+					}
+				}
+				developers {
+					developer {
+						id = "deathgod7"
+						name = "Death GOD 7"
+						email = "laxneshlovecfc@gmail.com"
+					}
+				}
+				scm {
+					url = "https://github.com/DeathGOD7/SE7ENLib.git"
+				}
+			}
+		}
+	}
 }
 
-signing {
-	// Configure the GPG key to use for signing
-	useGpgCmd()
 
+tasks.withType<Sign> {
+	useGpgCmd()
+    sign(publishing.publications["mavenJava"])
 }
 
 tasks.withType<JavaCompile>().configureEach {

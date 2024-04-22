@@ -48,6 +48,8 @@ public class MySQL extends SQLOperations {
 		return dbName;
 	}
 
+	private HikariConfig hikariConfig;
+	private HikariDataSource hikariDataSource;
 	private Connection connection;
 	/**
 	 * Get the connection
@@ -55,24 +57,45 @@ public class MySQL extends SQLOperations {
 	 */
 	public Connection getConnection(){
 		if (!isConnected()) {
-			connection = connectMySQL();
-		}
+			try {
+				connection = hikariDataSource.getConnection();
 
-		return connection;
+				if (isConnectionValid(connection)) { return connection; }
+				else { return null; }
+
+			}
+			catch (SQLException ex) {
+				Logger.log("[ERROR] " + ex.getMessage());
+				return null;
+			}
+		} else { return connection; }
 	}
 
 	/**
-	 * Check if the database is connected
+	 * Check if the connection is valid
+	 * @param connection The connection to check
 	 * @return {@link Boolean}
 	 */
-	public boolean isConnected(){
+	public boolean isConnectionValid(Connection connection) {
 		try {
-			return (connection != null && connection.isValid(2));
+			return connection.isValid(2);
 		} catch (SQLException e) {
 			Logger.log("[ERROR] " + e.getMessage());
 			return false;
 		}
+	}
 
+	/**
+	 * Check if the database is connected or its open
+	 * @return {@link Boolean}
+	 */
+	public boolean isConnected(){
+		try {
+			return connection != null && !connection.isClosed();
+		} catch (SQLException e) {
+			Logger.log("[ERROR] " + e.getMessage());
+			return false;
+		}
 	}
 	private final LinkedHashMap<String, Table> tables = new LinkedHashMap<>();
 	/**
@@ -127,27 +150,25 @@ public class MySQL extends SQLOperations {
 	}
 
 	private Connection connectMySQL() {
-		HikariConfig config = new HikariConfig();
+		hikariConfig = new HikariConfig();
 		String cleanedUrl = this.host.replaceFirst("^(https?://)?", "");
 		Connection temp;
 
-		config.setJdbcUrl("jdbc:mysql://" + cleanedUrl + "/" + this.dbName + "?autoReconnect=true");
-		config.setUsername(this.username);
-		config.setPassword(this.password);
+		hikariConfig.setJdbcUrl("jdbc:mysql://" + cleanedUrl + "/" + this.dbName);
+		hikariConfig.setUsername(this.username);
+		hikariConfig.setPassword(this.password);
 		//config.setDriverClassName("com.mysql.cj.jdbc.Driver");
-		config.addDataSourceProperty("cachePrepStmts", "true");
-		config.addDataSourceProperty("prepStmtCacheSize", "250");
-		config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-
-		// enable auto reconnect ??
-		config.addDataSourceProperty("autoReconnect", "true");
+		hikariConfig.addDataSourceProperty("cachePrepStmts", "true");
+		hikariConfig.addDataSourceProperty("prepStmtCacheSize", "250");
+		hikariConfig.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
 
 		PoolSettings poolSettings = this.dbInfo.getPoolSettings();
 		if (poolSettings != null) {
-			config.setMaximumPoolSize(poolSettings.getMaxPoolSize());
-			config.setIdleTimeout(poolSettings.getIdleTimeout());
-			config.setConnectionTimeout(poolSettings.getConnectionTimeout());
-			config.setMaxLifetime(poolSettings.getMaxLifetime());
+			hikariConfig.setMaximumPoolSize(poolSettings.getMaxPoolSize());
+			hikariConfig.setMinimumIdle(poolSettings.getMaxPoolSize());
+			hikariConfig.setIdleTimeout(poolSettings.getIdleTimeout());
+			hikariConfig.setConnectionTimeout(poolSettings.getConnectionTimeout());
+			hikariConfig.setMaxLifetime(poolSettings.getMaxLifetime());
 		}
 
 		try {
@@ -155,8 +176,8 @@ public class MySQL extends SQLOperations {
 				return connection;
 			}
 
-			HikariDataSource dataSource = new HikariDataSource(config);
-			temp = dataSource.getConnection();
+			hikariDataSource = new HikariDataSource(hikariConfig);
+			temp = hikariDataSource.getConnection();
 			return temp;
 		} catch (SQLException ex) {
 			Logger.log("[ERROR] " + ex.getMessage());
