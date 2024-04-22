@@ -1,5 +1,6 @@
 package io.github.deathgod7.SE7ENLib.database;
 
+import io.github.deathgod7.SE7ENLib.Logger;
 import io.github.deathgod7.SE7ENLib.database.component.Table;
 import io.github.deathgod7.SE7ENLib.database.dbtype.mongodb.MongoDB;
 import io.github.deathgod7.SE7ENLib.database.dbtype.mysql.MySQL;
@@ -220,7 +221,20 @@ public class DatabaseManager {
 			if (rs != null)
 				rs.close();
 		} catch (SQLException ex) {
-			ex.printStackTrace();
+			Logger.log("[CON CLOSE ERROR] " + ex.getMessage());
+		}
+	}
+
+	/**
+	 * Close the SQL connection for HikariPool and/or SQLite too (if useful)
+	 * @param con The connection to close
+	 */
+	public void closeConnection(Connection con) {
+		try {
+			if (con != null)
+				con.close();
+		} catch (SQLException ex) {
+			Logger.log("[CON CLOSE ERROR] " + ex.getMessage());
 		}
 	}
 

@@ -2,6 +2,7 @@ package io.github.deathgod7.SE7ENLib.database.dbtype.mysql;
 
 import io.github.deathgod7.SE7ENLib.Logger;
 import io.github.deathgod7.SE7ENLib.database.DatabaseInfo;
+import io.github.deathgod7.SE7ENLib.database.DatabaseManager;
 import io.github.deathgod7.SE7ENLib.database.DatabaseManager.DatabaseType;
 import io.github.deathgod7.SE7ENLib.database.DatabaseManager.DataType;
 import io.github.deathgod7.SE7ENLib.database.PoolSettings;
@@ -56,19 +57,17 @@ public class MySQL extends SQLOperations {
 	 * @return {@link Connection}
 	 */
 	public Connection getConnection(){
-		if (!isConnected()) {
-			try {
-				connection = hikariDataSource.getConnection();
+		try {
+			connection = hikariDataSource.getConnection();
 
-				if (isConnectionValid(connection)) { return connection; }
-				else { return null; }
+			if (isConnectionValid(connection)) { return connection; }
+			else { return null; }
 
-			}
-			catch (SQLException ex) {
-				Logger.log("[ERROR] " + ex.getMessage());
-				return null;
-			}
-		} else { return connection; }
+		}
+		catch (SQLException ex) {
+			Logger.log("[GET CON ERROR] " + ex.getMessage());
+			return null;
+		}
 	}
 
 	/**
@@ -80,13 +79,14 @@ public class MySQL extends SQLOperations {
 		try {
 			return connection.isValid(2);
 		} catch (SQLException e) {
-			Logger.log("[ERROR] " + e.getMessage());
+			Logger.log("[CON VALID ERROR] " + e.getMessage());
 			return false;
 		}
 	}
 
 	/**
 	 * Check if the database is connected or its open
+	 * @deprecated Since version 1.1.1, use {@link #isConnectionValid(Connection)} instead
 	 * @return {@link Boolean}
 	 */
 	public boolean isConnected(){
@@ -152,7 +152,6 @@ public class MySQL extends SQLOperations {
 	private Connection connectMySQL() {
 		hikariConfig = new HikariConfig();
 		String cleanedUrl = this.host.replaceFirst("^(https?://)?", "");
-		Connection temp;
 
 		hikariConfig.setJdbcUrl("jdbc:mysql://" + cleanedUrl + "/" + this.dbName);
 		hikariConfig.setUsername(this.username);
@@ -172,13 +171,8 @@ public class MySQL extends SQLOperations {
 		}
 
 		try {
-			if (connection != null && !connection.isClosed()) {
-				return connection;
-			}
-
 			hikariDataSource = new HikariDataSource(hikariConfig);
-			temp = hikariDataSource.getConnection();
-			return temp;
+			return hikariDataSource.getConnection();
 		} catch (SQLException ex) {
 			Logger.log("[ERROR] " + ex.getMessage());
 			return null;
@@ -193,13 +187,17 @@ public class MySQL extends SQLOperations {
 				"WHERE table_schema = '"+ this.getDBName() +"' AND table_type = 'base table' " +
 				"ORDER BY table_name";
 		try {
-			PreparedStatement ps = this.getConnection().prepareStatement(query);
+			Connection con = this.getConnection();
+			PreparedStatement ps = con.prepareStatement(query);
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
 				String tablename = rs.getString(1);
 				tables.put(tablename, this.loadTable(tablename));
 			}
-			ps.close();
+
+			// close the fricking connection
+			DatabaseManager.getInstance().closeConnection(ps,rs);
+			DatabaseManager.getInstance().closeConnection(con);
 		} catch (SQLException ex) {
 			Logger.log("[ERROR] " + ex.getMessage());
 		}
@@ -217,8 +215,11 @@ public class MySQL extends SQLOperations {
 		String primarykey = "";
 
 		try {
-			PreparedStatement ps = this.getConnection().prepareStatement(query);
+			Connection con = this.getConnection();
+
+			PreparedStatement ps = con.prepareStatement(query);
 			ResultSet rs = ps.executeQuery();
+
 			while (rs.next()) {
 				String name = rs.getString("Field");
 				String type = rs.getString("Type");
@@ -242,7 +243,10 @@ public class MySQL extends SQLOperations {
 
 				columns.put(name, column);
 			}
-			ps.close();
+
+			// close the fricking connection here too you dumb human
+			DatabaseManager.getInstance().closeConnection(ps,rs);
+			DatabaseManager.getInstance().closeConnection(con);
 		}
 		catch (SQLException ex) {
 			Logger.log("[ERROR] " + ex.getMessage());

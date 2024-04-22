@@ -1,8 +1,11 @@
 package io.github.deathgod7.SE7ENLib.database.dbtype.sqlite;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import io.github.deathgod7.SE7ENLib.Logger;
 import io.github.deathgod7.SE7ENLib.database.DatabaseInfo;
 import io.github.deathgod7.SE7ENLib.database.DatabaseManager;
+import io.github.deathgod7.SE7ENLib.database.PoolSettings;
 import io.github.deathgod7.SE7ENLib.database.handler.SQLOperations;
 import io.github.deathgod7.SE7ENLib.database.component.Column;
 import io.github.deathgod7.SE7ENLib.database.component.Table;
@@ -45,22 +48,55 @@ public class SQLite extends SQLOperations {
 		return dbInfo;
 	}
 
+	private HikariConfig hikariConfig;
+	private HikariDataSource hikariDataSource;
 
 	/**
-	 * Check if the database is connected
+	 * Check if the database is connected or its open
+	 * @deprecated Since version 1.1.1, use {@link #isConnectionValid(Connection)} instead
 	 * @return {@link Boolean}
 	 */
 	public boolean isConnected(){
-		return (connection != null);
+		try {
+			return connection != null && !connection.isClosed();
+		} catch (SQLException e) {
+			Logger.log("[ERROR] " + e.getMessage());
+			return false;
+		}
 	}
 
 	/**
 	 * Get the connection
 	 * @return {@link Connection}
 	 */
-	public Connection getConnection() {
-		return connection;
+	public Connection getConnection(){
+		try {
+			connection = hikariDataSource.getConnection();
+
+			if (isConnectionValid(connection)) { return connection; }
+			else { return null; }
+
+		}
+		catch (SQLException ex) {
+			Logger.log("[GET CON ERROR] " + ex.getMessage());
+			return null;
+		}
 	}
+
+	/**
+	 * Check if the connection is valid
+	 * @param connection The connection to check
+	 * @return {@link Boolean}
+	 */
+	public boolean isConnectionValid(Connection connection) {
+		try {
+			return connection.isValid(2);
+		} catch (SQLException e) {
+			Logger.log("[CON VALID ERROR] " + e.getMessage());
+			return false;
+		}
+	}
+
 
 	private final LinkedHashMap<String, Table> tables = new LinkedHashMap<>();
 
@@ -96,8 +132,8 @@ public class SQLite extends SQLOperations {
 	public SQLite(String dbName, String directory){
 		this.dbName = dbName;
 		this.dirDB = directory;
-		this.connection = connectSQLite();
 		this.dbInfo = new DatabaseInfo(dbName, directory);
+		this.connection = connectSQLite();
 	}
 
 	/**
@@ -112,7 +148,6 @@ public class SQLite extends SQLOperations {
 	}
 
 	private Connection connectSQLite() {
-		Connection temp;
 		File dbFile = new File(this.dirDB + "/" + dbName + ".db");
 
 		if (!dbFile.exists()) {
@@ -127,32 +162,31 @@ public class SQLite extends SQLOperations {
 			}
 		}
 
-		try {
-			if (connection != null && !connection.isClosed()) {
-				return connection;
-			}
-			Class.forName("org.sqlite.JDBC");
-			temp = DriverManager.getConnection("jdbc:sqlite:" + dbFile);
-			return temp;
-		} catch (SQLException | ClassNotFoundException ex) {
-			Logger.log("[ERROR] " + ex.getMessage());
-			return null;
-		}
-	}
+		hikariConfig = new HikariConfig();
 
-	/**
-	 * Close the SQL connection
-	 */
-	public void closeConnection() {
-		if (isConnected()) {
-			try {
-				if (!(connection.isClosed())) {
-					connection.close();
-				}
-				connection = null;
-			} catch (SQLException ex) {
-				Logger.log("[ERROR] " + ex.getMessage());
-			}
+		hikariConfig.setJdbcUrl("jdbc:sqlite:" + dbFile);
+		hikariConfig.setUsername("");
+		hikariConfig.setPassword("");
+
+		hikariConfig.addDataSourceProperty("cachePrepStmts", "true");
+		hikariConfig.addDataSourceProperty("prepStmtCacheSize", "250");
+		hikariConfig.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+
+		PoolSettings poolSettings = this.dbInfo.getPoolSettings();
+		if (poolSettings != null) {
+			hikariConfig.setMaximumPoolSize(poolSettings.getMaxPoolSize());
+			hikariConfig.setMinimumIdle(poolSettings.getMaxPoolSize());
+			hikariConfig.setIdleTimeout(poolSettings.getIdleTimeout());
+			hikariConfig.setConnectionTimeout(poolSettings.getConnectionTimeout());
+			hikariConfig.setMaxLifetime(poolSettings.getMaxLifetime());
+		}
+
+		try {
+			hikariDataSource = new HikariDataSource(hikariConfig);
+			return hikariDataSource.getConnection();
+		} catch (SQLException ex) {
+			Logger.log("[SQLITE ERROR] " + ex.getMessage());
+			return null;
 		}
 	}
 
@@ -190,13 +224,17 @@ public class SQLite extends SQLOperations {
 				" WHERE type = 'table' AND name NOT LIKE 'sqlite_%' " +
 				"ORDER BY tbl_name";
 		try {
-			PreparedStatement ps = this.getConnection().prepareStatement(query);
+			Connection con = this.getConnection();
+			PreparedStatement ps = con.prepareStatement(query);
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
 				String tablename = rs.getString(1); // rs.getString("tbl_name");
 				tables.put(tablename, this.loadTable(tablename));
 			}
-			ps.close();
+
+			// close the fricking connection .... even for sqlite
+			DatabaseManager.getInstance().closeConnection(ps,rs);
+			DatabaseManager.getInstance().closeConnection(con);
 		} catch (SQLException ex) {
 			Logger.log("[ERROR] " + ex.getMessage());
 		}
@@ -215,7 +253,8 @@ public class SQLite extends SQLOperations {
 		String primarykey = "";
 
 		try {
-			PreparedStatement ps = this.getConnection().prepareStatement(query);
+			Connection con = this.getConnection();
+			PreparedStatement ps = con.prepareStatement(query);
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
 				String name = rs.getString("name");
@@ -236,7 +275,10 @@ public class SQLite extends SQLOperations {
 
 				columns.put(name, column);
 			}
-			ps.close();
+
+			// close the fricking connection again .... even for sqlite
+			DatabaseManager.getInstance().closeConnection(ps,rs);
+			DatabaseManager.getInstance().closeConnection(con);
 		}
 		catch (SQLException ex) {
 			Logger.log("[ERROR] " + ex.getMessage());

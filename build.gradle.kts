@@ -4,16 +4,15 @@ import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.SonatypeHost
 
 plugins {
-    id("java")
-    id("maven-publish")
+	id("java")
+	id("maven-publish")
 	id("signing")
-    id("com.github.johnrengelman.shadow") version "8.1.1"
+	id("com.github.johnrengelman.shadow") version "8.1.1"
 	id("com.vanniktech.maven.publish") version "0.28.0"
 }
 
 group = "io.github.deathgod7.SE7ENLib"
-version = "1.1.0"
-//version = "1.1.0-SNAPSHOT"
+version = "1.1.1-rc1"
 description = "A lib to aid in development for my java stuff."
 
 

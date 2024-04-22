@@ -152,7 +152,11 @@ public abstract class SQLOperations implements DatabaseOperations {
 			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
 			PreparedStatement ps = con.prepareStatement(query.toString());
 			ps.executeUpdate();
-			ps.close();
+
+			// take his wife to gulag
+			DatabaseManager.getInstance().closeConnection(ps, null);
+			DatabaseManager.getInstance().closeConnection(con);
+
 			DatabaseManager dbm = DatabaseManager.getInstance();
 			DatabaseType dbType = dbm.getDbInfo().getDbType();
 			switch (dbType) {
@@ -189,7 +193,11 @@ public abstract class SQLOperations implements DatabaseOperations {
 			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
 			PreparedStatement ps = con.prepareStatement(query.toString());
 			ps.executeUpdate();
-			ps.close();
+
+			// take him to gulag too
+			DatabaseManager.getInstance().closeConnection(ps, null);
+			DatabaseManager.getInstance().closeConnection(con);
+
 			DatabaseManager dbm = DatabaseManager.getInstance();
 			DatabaseType dbType = dbm.getDbInfo().getDbType();
 			switch (dbType) {
@@ -307,7 +315,10 @@ public abstract class SQLOperations implements DatabaseOperations {
 				}
 
 				s.executeUpdate();
-				s.close();
+
+				// here take back your connection you damn...m...f
+				DatabaseManager.getInstance().closeConnection(s, null);
+				DatabaseManager.getInstance().closeConnection(con);
 				return true;
 			} catch (SQLException e) {
 				Logger.log("[ERROR] " + e.getMessage());
@@ -361,7 +372,10 @@ public abstract class SQLOperations implements DatabaseOperations {
 			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
 			PreparedStatement s = con.prepareStatement(query.toString());
 			s.executeUpdate();
-			s.close();
+
+			// again closing as promised xD
+			DatabaseManager.getInstance().closeConnection(s, null);
+			DatabaseManager.getInstance().closeConnection(con);
 			return true;
 		} catch (SQLException e) {
 			Logger.log("[ERROR] " + e.getMessage());
@@ -447,7 +461,10 @@ public abstract class SQLOperations implements DatabaseOperations {
 					break;
 			}
 			s.executeUpdate();
-			s.close();
+
+			// close all the fricking con
+			DatabaseManager.getInstance().closeConnection(s, null);
+			DatabaseManager.getInstance().closeConnection(con);
 			return true;
 		} catch (SQLException e) {
 			Logger.log("[ERROR] " + e.getMessage());
@@ -586,8 +603,11 @@ public abstract class SQLOperations implements DatabaseOperations {
 
 					// close the PS and RS
 					DatabaseManager.getInstance().closeConnection(s, rs);
+					DatabaseManager.getInstance().closeConnection(con);
 				} catch (SQLException e) {
-					s.close();
+					// close all the fricking con
+					DatabaseManager.getInstance().closeConnection(s, rs);
+					DatabaseManager.getInstance().closeConnection(con);
 					Logger.log("[ERROR] " + e.getMessage());
 				}
 			}
@@ -729,6 +749,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 				results.add(temp);
 			}
 			DatabaseManager.getInstance().closeConnection(s, rs);
+			DatabaseManager.getInstance().closeConnection(con);
 		} catch (SQLException e) {
 			Logger.log("[ERROR] " + e.getMessage());
 		}
@@ -803,6 +824,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 			}
 			// close both PS and RS
 			DatabaseManager.getInstance().closeConnection(s, rs);
+			DatabaseManager.getInstance().closeConnection(con);
 		} catch (SQLException e) {
 			Logger.log("[ERROR] " + e.getMessage());
 		}
