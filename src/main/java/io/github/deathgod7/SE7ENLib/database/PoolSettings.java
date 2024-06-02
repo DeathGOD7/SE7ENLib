@@ -10,6 +10,7 @@ package io.github.deathgod7.SE7ENLib.database;
  * @since 1.0
  */
 public class PoolSettings {
+	int minIdleConnections;
 	int maxPoolSize;
 	long connectionTimeout;
 	long idleTimeout;
@@ -19,6 +20,7 @@ public class PoolSettings {
 	 * Creates a new PoolSettings object with default values
 	 */
 	public PoolSettings() {
+		this.minIdleConnections = 5;
 		this.maxPoolSize = 10;
 		this.connectionTimeout = 30000;
 		this.idleTimeout = 600000;
@@ -27,16 +29,34 @@ public class PoolSettings {
 
 	/**
 	 * Creates a new PoolSettings object with the given values
-	 * @param maxPoolSize the maximum pool size
-	 * @param connectionTimeout the connection timeout
+	 * @param minIdleConnections the minimum idle connections that should be kept in the pool
+	 * @param maxPoolSize the maximum pool size that should be in the pool
+	 * @param connectionTimeout the connection timeout that should be used
 	 * @param idleTimeout the idle timeout
 	 * @param maxLifetime the maximum lifetime
 	 */
-	public PoolSettings(int maxPoolSize, long connectionTimeout, long idleTimeout, long maxLifetime) {
+	public PoolSettings(int minIdleConnections, int maxPoolSize, long connectionTimeout, long idleTimeout, long maxLifetime) {
+		this.minIdleConnections = minIdleConnections;
 		this.maxPoolSize = maxPoolSize;
 		this.connectionTimeout = connectionTimeout;
 		this.idleTimeout = idleTimeout;
 		this.maxLifetime = maxLifetime;
+	}
+
+	/**
+	 * Sets the minimum idle connections
+	 * @param minIdleConnections the minimum idle connections
+	 */
+	public void setMinIdleConnections(int minIdleConnections) {
+		this.minIdleConnections = minIdleConnections;
+	}
+
+	/**
+	 * Returns the pool minimum idle connections
+	 * @return {@link int}
+	 */
+	public int getMinIdleConnections() {
+		return minIdleConnections;
 	}
 
 	/**

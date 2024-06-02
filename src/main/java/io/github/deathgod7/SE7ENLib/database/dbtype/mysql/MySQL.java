@@ -164,8 +164,8 @@ public class MySQL extends SQLOperations {
 
 		PoolSettings poolSettings = this.dbInfo.getPoolSettings();
 		if (poolSettings != null) {
+			hikariConfig.setMinimumIdle(poolSettings.getMinIdleConnections());
 			hikariConfig.setMaximumPoolSize(poolSettings.getMaxPoolSize());
-			hikariConfig.setMinimumIdle(poolSettings.getMaxPoolSize());
 			hikariConfig.setIdleTimeout(poolSettings.getIdleTimeout());
 			hikariConfig.setConnectionTimeout(poolSettings.getConnectionTimeout());
 			hikariConfig.setMaxLifetime(poolSettings.getMaxLifetime());

@@ -56,6 +56,7 @@ public class SQLite extends SQLOperations {
 	 * @deprecated Since version 1.1.1, use {@link #isConnectionValid(Connection)} instead
 	 * @return {@link Boolean}
 	 */
+	@Deprecated
 	public boolean isConnected(){
 		try {
 			return connection != null && !connection.isClosed();
@@ -174,8 +175,8 @@ public class SQLite extends SQLOperations {
 
 		PoolSettings poolSettings = this.dbInfo.getPoolSettings();
 		if (poolSettings != null) {
+			hikariConfig.setMinimumIdle(poolSettings.getMinIdleConnections());
 			hikariConfig.setMaximumPoolSize(poolSettings.getMaxPoolSize());
-			hikariConfig.setMinimumIdle(poolSettings.getMaxPoolSize());
 			hikariConfig.setIdleTimeout(poolSettings.getIdleTimeout());
 			hikariConfig.setConnectionTimeout(poolSettings.getConnectionTimeout());
 			hikariConfig.setMaxLifetime(poolSettings.getMaxLifetime());
