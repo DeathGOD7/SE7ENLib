@@ -89,6 +89,7 @@ public class MySQL extends SQLOperations {
 	 * @deprecated Since version 1.1.1, use {@link #isConnectionValid(Connection)} instead
 	 * @return {@link Boolean}
 	 */
+	@Deprecated
 	public boolean isConnected(){
 		try {
 			return connection != null && !connection.isClosed();
