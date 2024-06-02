@@ -8,7 +8,7 @@ plugins {
 	id("maven-publish")
 	id("signing")
 	id("com.github.johnrengelman.shadow") version "8.1.1"
-	id("com.vanniktech.maven.publish") version "0.28.0"
+	id("com.vanniktech.maven.publish") version "0.25.3"
 }
 
 group = "io.github.deathgod7.SE7ENLib"
