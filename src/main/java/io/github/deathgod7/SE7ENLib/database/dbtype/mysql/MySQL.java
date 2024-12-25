@@ -165,6 +165,7 @@ public class MySQL extends SQLOperations {
 		hikariConfig.addDataSourceProperty("cachePrepStmts", "true");
 		hikariConfig.addDataSourceProperty("prepStmtCacheSize", "250");
 		hikariConfig.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+		hikariConfig.setLeakDetectionThreshold(2000);
 
 		PoolSettings poolSettings = this.dbInfo.getPoolSettings();
 		if (poolSettings != null) {
@@ -191,18 +192,16 @@ public class MySQL extends SQLOperations {
 		String query = "SELECT table_name FROM information_schema.tables " +
 				"WHERE table_schema = '"+ this.getDBName() +"' AND table_type = 'base table' " +
 				"ORDER BY table_name";
-		try {
-			Connection con = this.getConnection();
+		try (Connection con = this.getConnection()) {
 			PreparedStatement ps = con.prepareStatement(query);
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
 				String tablename = rs.getString(1);
 				tables.put(tablename, this.loadTable(tablename));
 			}
-
 			// close the fricking connection
-			DatabaseManager.getInstance().closeConnection(ps,rs);
-			DatabaseManager.getInstance().closeConnection(con);
+			// DatabaseManager.getInstance().closeConnection(ps,rs);
+			// DatabaseManager.getInstance().closeConnection(con);
 		} catch (SQLException ex) {
 			Logger.log("[ERROR] " + ex.getMessage());
 		}
@@ -219,9 +218,7 @@ public class MySQL extends SQLOperations {
 		LinkedHashMap<String, Column> columns = new LinkedHashMap<>();
 		String primarykey = "";
 
-		try {
-			Connection con = this.getConnection();
-
+		try (Connection con = this.getConnection()) {
 			PreparedStatement ps = con.prepareStatement(query);
 			ResultSet rs = ps.executeQuery();
 
@@ -248,10 +245,9 @@ public class MySQL extends SQLOperations {
 
 				columns.put(name, column);
 			}
-
 			// close the fricking connection here too you dumb human
-			DatabaseManager.getInstance().closeConnection(ps,rs);
-			DatabaseManager.getInstance().closeConnection(con);
+			// DatabaseManager.getInstance().closeConnection(ps,rs);
+			// DatabaseManager.getInstance().closeConnection(con);
 		}
 		catch (SQLException ex) {
 			Logger.log("[ERROR] " + ex.getMessage());
@@ -264,6 +260,7 @@ public class MySQL extends SQLOperations {
 
 		return new Table(tablename, primaryKey, columns.values());
 	}
+
 	private int getLimitFromText(String input) {
 		// Define a regular expression pattern to match the integer within parentheses
 		Pattern pattern = Pattern.compile("\\((\\d+)\\)");

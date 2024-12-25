@@ -6,9 +6,12 @@ package io.github.deathgod7.SE7ENLib.Database;
 
 import io.github.deathgod7.SE7ENLib.database.DatabaseInfo;
 import io.github.deathgod7.SE7ENLib.database.DatabaseManager;
+import io.github.deathgod7.SE7ENLib.database.PoolSettings;
 import io.github.deathgod7.SE7ENLib.database.component.Column;
 import io.github.deathgod7.SE7ENLib.database.component.Table;
 import io.github.deathgod7.SE7ENLib.database.dbtype.mysql.MySQL;
+import io.github.deathgod7.SE7ENLib.database.dbtype.sqlite.SQLite;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -19,14 +22,20 @@ import java.util.List;
 
 public class MySQL_Test {
 	@Test
-	//@Disabled
+	@Disabled
 	@DisplayName("Test : MySQL database")
 	public void MySQLDatabaseConnection() {
-		DatabaseInfo dbInfo = new DatabaseInfo("test", "http://localhost", "root", "", DatabaseManager.DatabaseType.MySQL, null);
+
+		PoolSettings poolSettings = new PoolSettings();
+		poolSettings.setMinIdleConnections(5);
+		poolSettings.setMaxPoolSize(10);
+
+		DatabaseInfo dbInfo = new DatabaseInfo("se7en_plugin", "http://localhost",
+				"root", "", DatabaseManager.DatabaseType.MySQL,
+				poolSettings);
 		DatabaseManager dbManager = new DatabaseManager(dbInfo);
 
 		MySQL db = dbManager.getMySQL();
-		Connection con = db.getConnection();
 
 		Column pk = new Column("id", DatabaseManager.DataType.INTEGER);
 		pk.setAutoIncrement(true);
@@ -51,36 +60,88 @@ public class MySQL_Test {
 		Table table = new Table("tempdb", pk, tempp);
 		db.createTable(table, DatabaseManager.getInstance().getDbInfo().getDbType());
 
-//		for (Table tb: DatabaseManager.getInstance().getTables().values()) {
-//			System.out.println(tb.getName());
-//			System.out.println(tb.getPrimaryKey().getName());
-//		}
+//		writeDataTest(dbManager);
+		readAllDataTest(dbManager);
+		readDataTest(dbManager);
+//		updateDataTest(dbManager);
 
+	}
 
-		Column vpk = new Column("id", 2,  DatabaseManager.DataType.INTEGER);
-		Column vfirst = new Column("varchars", "meow?data", DatabaseManager.DataType.VARCHAR);
-		Column vsecond = new Column("integars", 169, DatabaseManager.DataType.INTEGER);
-		Column vthird = new Column("floats", 25691.7, DatabaseManager.DataType.FLOAT);
-		Column vfourth = new Column("texts", "damn it reallyyy works...again v2", DatabaseManager.DataType.TEXT);
+	private void writeDataTest(DatabaseManager dbm) {
+		MySQL db = dbm.getMySQL();
 
-		List<Column> vtempp = new ArrayList<>();
-		vtempp.add(vfirst);
-		vtempp.add(vsecond);
-		vtempp.add(vthird);
-		vtempp.add(vfourth);
+		for (int i = 1; i <= 1000; i++) {
+			Column pk = new Column("id", i, DatabaseManager.DataType.INTEGER);
+			Column first = new Column("varchars", "meow?data", DatabaseManager.DataType.VARCHAR);
+			Column second = new Column("integars", 169, DatabaseManager.DataType.INTEGER);
+			Column third = new Column("floats", 25691.7, DatabaseManager.DataType.FLOAT);
+			Column fourth = new Column("texts", "damn it reallyyy works...again v2", DatabaseManager.DataType.TEXT);
 
-//		db.insertData("tempdb", vtempp);
-//		db.updateData("tempdb", vpk, vtempp);
-//		List<List<Column>> test = db.getAllDatas("tempdb");
+			List<Column> tempp = new ArrayList<>();
+			tempp.add(first);
+			tempp.add(second);
+			tempp.add(third);
+			tempp.add(fourth);
 
-//		for (List<Column> temp : test) {
-//			for (Column c: temp) {
-//				System.out.println(c.getName() + " : " + c.getValue());
-//			}
-//		}
+			System.out.printf("Writing data %d\n", i);
+			System.out.println(tempp.toString());
+
+			db.insertData("tempdb", tempp);
+		}
+	}
+
+	private void readAllDataTest(DatabaseManager dbm) {
+		MySQL db = dbm.getMySQL();
+
+		int count = 0;
+		for (List<Column> tt : db.getAllDatas("tempdb")) {
+			System.out.println("Row : " + ++count);
+			for (Column c: tt) {
+				System.out.println(c.getName() + " : " + c.getValue());
+			}
+		}
+	}
+
+	private void readDataTest(DatabaseManager dbm) {
+		MySQL db = dbm.getMySQL();
+
+		for (int i = 1; i <= 1000; i++) {
+			Column pk = new Column("id", i, DatabaseManager.DataType.INTEGER);
+			List<Column> tt = db.getExactData("tempdb", pk);
+			for (Column c: tt) {
+				System.out.println(c.getName() + " : " + c.getValue());
+			}
+			System.out.println("---------------------");
+		}
+	}
+
+	private void updateDataTest(DatabaseManager dbm) {
+		MySQL db = dbm.getMySQL();
+
+		for (int i = 1; i <= 1000; i++) {
+			Column pk = new Column("id", i, DatabaseManager.DataType.INTEGER);
+			Column first = new Column("varchars", "After Test", DatabaseManager.DataType.VARCHAR);
+			Column second = new Column("integars", 100, DatabaseManager.DataType.INTEGER);
+			Column third = new Column("floats", 100.0, DatabaseManager.DataType.FLOAT);
+			Column fourth = new Column("texts", "All data updated!", DatabaseManager.DataType.TEXT);
+
+			List<Column> tempp = new ArrayList<>();
+			tempp.add(first);
+			tempp.add(second);
+			tempp.add(third);
+			tempp.add(fourth);
+
+			System.out.printf("Updating data %d\n", i);
+			System.out.println(tempp.toString());
+
+			db.insertData("tempdb", tempp);
+			db.updateData("tempdb", pk, tempp);
+
+		}
 
 
 	}
+
 
 
 }

@@ -125,11 +125,12 @@ public class SQLite extends SQLOperations {
 	 * Create a new SQLite object
 	 * @param dbName {@link String} The name of the database file
 	 * @param directory {@link String} The directory of the database file
+	 * @param poolSettings {@link PoolSettings} The pool settings
 	 */
-	public SQLite(String dbName, String directory){
+	public SQLite(String dbName, String directory, PoolSettings poolSettings){
 		this.dbName = dbName;
 		this.dirDB = directory;
-		this.dbInfo = new DatabaseInfo(dbName, directory);
+		this.dbInfo = new DatabaseInfo(dbName, directory, poolSettings);
 		if (connectSQLite()) {
 			Logger.log("[OBJECT CREATION INFO] MySQL connected successfully");
 		}else {
@@ -176,6 +177,7 @@ public class SQLite extends SQLOperations {
 		hikariConfig.addDataSourceProperty("cachePrepStmts", "true");
 		hikariConfig.addDataSourceProperty("prepStmtCacheSize", "250");
 		hikariConfig.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+		hikariConfig.setLeakDetectionThreshold(2000);
 
 		PoolSettings poolSettings = this.dbInfo.getPoolSettings();
 		if (poolSettings != null) {
@@ -202,12 +204,12 @@ public class SQLite extends SQLOperations {
 		String sqlitever;
 		int[] sqliteverformatted = new int[3];
 
-		try {
+		try (Connection con = this.getConnection()) {
 			// Crrate a query
 			String query = "SELECT sqlite_version()";
 
 			// Create a statement
-			PreparedStatement ps = this.getConnection().prepareStatement(query);
+			PreparedStatement ps = con.prepareStatement(query);
 
 			// Execute the query to retrieve the SQLite version
 			ResultSet resultSet = ps.executeQuery();
@@ -215,7 +217,6 @@ public class SQLite extends SQLOperations {
 			// Retrieve the result
 			if (resultSet.next()) {
 				sqlitever = resultSet.getString(1);
-				ps.close();
 			}
 		} catch (SQLException ex) {
 			Logger.log("[ERROR] " + ex.getMessage());
@@ -228,8 +229,7 @@ public class SQLite extends SQLOperations {
 		String query = "SELECT tbl_name FROM " + schematable +
 				" WHERE type = 'table' AND name NOT LIKE 'sqlite_%' " +
 				"ORDER BY tbl_name";
-		try {
-			Connection con = this.getConnection();
+		try (Connection con = this.getConnection()) {
 			PreparedStatement ps = con.prepareStatement(query);
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
@@ -238,8 +238,8 @@ public class SQLite extends SQLOperations {
 			}
 
 			// close the fricking connection .... even for sqlite
-			DatabaseManager.getInstance().closeConnection(ps,rs);
-			DatabaseManager.getInstance().closeConnection(con);
+			// DatabaseManager.getInstance().closeConnection(ps,rs);
+			// DatabaseManager.getInstance().closeConnection(con);
 		} catch (SQLException ex) {
 			Logger.log("[ERROR] " + ex.getMessage());
 		}
@@ -282,8 +282,8 @@ public class SQLite extends SQLOperations {
 			}
 
 			// close the fricking connection again .... even for sqlite
-			DatabaseManager.getInstance().closeConnection(ps,rs);
-			DatabaseManager.getInstance().closeConnection(con);
+			// DatabaseManager.getInstance().closeConnection(ps,rs);
+			// DatabaseManager.getInstance().closeConnection(con);
 		}
 		catch (SQLException ex) {
 			Logger.log("[ERROR] " + ex.getMessage());

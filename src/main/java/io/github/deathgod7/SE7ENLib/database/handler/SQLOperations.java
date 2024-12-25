@@ -148,14 +148,13 @@ public abstract class SQLOperations implements DatabaseOperations {
 
 		Logger.log("[CREATE TABLE QUERY] " + query);
 
-		try {
-			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
+		try (Connection con = (Connection) DatabaseManager.getInstance().getConnection()) {
 			PreparedStatement ps = con.prepareStatement(query.toString());
 			ps.executeUpdate();
 
 			// take his wife to gulag
-			DatabaseManager.getInstance().closeConnection(ps, null);
-			DatabaseManager.getInstance().closeConnection(con);
+			// DatabaseManager.getInstance().closeConnection(ps, null);
+			// DatabaseManager.getInstance().closeConnection(con);
 
 			DatabaseManager dbm = DatabaseManager.getInstance();
 			DatabaseType dbType = dbm.getDbInfo().getDbType();
@@ -189,14 +188,13 @@ public abstract class SQLOperations implements DatabaseOperations {
 
 		Logger.log("[DROP TABLE QUERY] " + query);
 
-		try {
-			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
+		try (Connection con = (Connection) DatabaseManager.getInstance().getConnection()){
 			PreparedStatement ps = con.prepareStatement(query.toString());
 			ps.executeUpdate();
 
 			// take him to gulag too
-			DatabaseManager.getInstance().closeConnection(ps, null);
-			DatabaseManager.getInstance().closeConnection(con);
+			// DatabaseManager.getInstance().closeConnection(ps, null);
+			// DatabaseManager.getInstance().closeConnection(con);
 
 			DatabaseManager dbm = DatabaseManager.getInstance();
 			DatabaseType dbType = dbm.getDbInfo().getDbType();
@@ -249,8 +247,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 
 			Logger.log("[INSERT DATA QUERY] " + query);
 
-			try {
-				Connection con = (Connection) DatabaseManager.getInstance().getConnection();
+			try (Connection con = (Connection) DatabaseManager.getInstance().getConnection()) {
 				PreparedStatement s = con.prepareStatement(query.toString());
 				for (int i = 0; i < columns.size(); i++) {
 					switch (columns.get(i).getDataType()) {
@@ -317,8 +314,8 @@ public abstract class SQLOperations implements DatabaseOperations {
 				s.executeUpdate();
 
 				// here take back your connection you damn...m...f
-				DatabaseManager.getInstance().closeConnection(s, null);
-				DatabaseManager.getInstance().closeConnection(con);
+				// DatabaseManager.getInstance().closeConnection(s, null);
+				// DatabaseManager.getInstance().closeConnection(con);
 				return true;
 			} catch (SQLException e) {
 				Logger.log("[ERROR] " + e.getMessage());
@@ -368,14 +365,13 @@ public abstract class SQLOperations implements DatabaseOperations {
 
 		Logger.log("[UPDATE DATA QUERY] " + query);
 
-		try {
-			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
+		try (Connection con = (Connection) DatabaseManager.getInstance().getConnection()) {
 			PreparedStatement s = con.prepareStatement(query.toString());
 			s.executeUpdate();
 
 			// again closing as promised xD
-			DatabaseManager.getInstance().closeConnection(s, null);
-			DatabaseManager.getInstance().closeConnection(con);
+			// DatabaseManager.getInstance().closeConnection(s, null);
+			// DatabaseManager.getInstance().closeConnection(con);
 			return true;
 		} catch (SQLException e) {
 			Logger.log("[ERROR] " + e.getMessage());
@@ -398,8 +394,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 
 		Logger.log("[DELETE DATA QUERY] " + query);
 
-		try {
-			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
+		try (Connection con = (Connection) DatabaseManager.getInstance().getConnection()) {
 			PreparedStatement s = con.prepareStatement(query);
 			switch (primaryKey.getDataType()) {
 				case VARCHAR:
@@ -463,8 +458,8 @@ public abstract class SQLOperations implements DatabaseOperations {
 			s.executeUpdate();
 
 			// close all the fricking con
-			DatabaseManager.getInstance().closeConnection(s, null);
-			DatabaseManager.getInstance().closeConnection(con);
+			// DatabaseManager.getInstance().closeConnection(s, null);
+			// DatabaseManager.getInstance().closeConnection(con);
 			return true;
 		} catch (SQLException e) {
 			Logger.log("[ERROR] " + e.getMessage());
@@ -491,8 +486,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 
 		Logger.log("[GET EXACT DATA QUERY] " + query);
 
-		try {
-			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
+		try (Connection con = (Connection) DatabaseManager.getInstance().getConnection()) {
 			PreparedStatement s = con.prepareStatement(query);
 
 			switch (primaryKey.getDataType()) {
@@ -600,19 +594,19 @@ public abstract class SQLOperations implements DatabaseOperations {
 
 						result.add(rCol);
 					}
-
-					// close the PS and RS
-					DatabaseManager.getInstance().closeConnection(s, rs);
-					DatabaseManager.getInstance().closeConnection(con);
 				} catch (SQLException e) {
-					// close all the fricking con
-					DatabaseManager.getInstance().closeConnection(s, rs);
-					DatabaseManager.getInstance().closeConnection(con);
+					// DatabaseManager.getInstance().closeConnection(s, rs);
+					// DatabaseManager.getInstance().closeConnection(con);
 					Logger.log("[ERROR] " + e.getMessage());
 				}
 			}
+			// close the PS and RS
+			// DatabaseManager.getInstance().closeConnection(s, rs);
+			// DatabaseManager.getInstance().closeConnection(con);
 		} catch (SQLException e) {
 			Logger.log("[ERROR] " + e.getMessage());
+			// close all the fricking con "PROPERLYYY"
+			// DatabaseManager.getInstance().closeConnection(con);
 		}
 
 		return result;
@@ -637,8 +631,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 
 		Logger.log("[FIND DATA QUERY] " + query);
 
-		try {
-			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
+		try (Connection con = (Connection) DatabaseManager.getInstance().getConnection()) {
 			PreparedStatement s = con.prepareStatement(query);
 
 			switch (column.getDataType()) {
@@ -704,7 +697,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 			ResultSet rs = s.executeQuery();
 
 			// primary key and so on
-			List<Column> allTableCols = table.getColumns();
+			List<Column> allTableCols = new ArrayList<>(table.getColumns());
 			allTableCols.add(0, table.getPrimaryKey());
 
 			while (rs.next()) {
@@ -748,10 +741,13 @@ public abstract class SQLOperations implements DatabaseOperations {
 				}
 				results.add(temp);
 			}
-			DatabaseManager.getInstance().closeConnection(s, rs);
-			DatabaseManager.getInstance().closeConnection(con);
+
+			// DatabaseManager.getInstance().closeConnection(s, rs);
+			// DatabaseManager.getInstance().closeConnection(con);
 		} catch (SQLException e) {
 			Logger.log("[ERROR] " + e.getMessage());
+
+			// DatabaseManager.getInstance().closeConnection(con);
 		}
 
 		return results;
@@ -769,15 +765,14 @@ public abstract class SQLOperations implements DatabaseOperations {
 		String safeTableName = this.sanitizeSQLQuery(tablename);
 		Table table = DatabaseManager.getInstance().getTables().get(tablename);
 		String query = "SELECT * FROM `" + safeTableName + "`;";
-		try {
-			Logger.log("[GET ALL DATAS QUERY] " + query);
+		Logger.log("[GET ALL DATAS QUERY] " + query);
 
-			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
+		try (Connection con = (Connection) DatabaseManager.getInstance().getConnection();) {
 			PreparedStatement s = con.prepareStatement(query);
 			ResultSet rs = s.executeQuery();
 
 			// primary key and so on
-			List<Column> allTableCols = table.getColumns();
+			List<Column> allTableCols = new ArrayList<>(table.getColumns());
 			allTableCols.add(0, table.getPrimaryKey());
 
 			while (rs.next()) {
@@ -822,11 +817,13 @@ public abstract class SQLOperations implements DatabaseOperations {
 				}
 				allDatas.add(temp);
 			}
+
 			// close both PS and RS
-			DatabaseManager.getInstance().closeConnection(s, rs);
-			DatabaseManager.getInstance().closeConnection(con);
+			// DatabaseManager.getInstance().closeConnection(s, rs);
+			// DatabaseManager.getInstance().closeConnection(con);
 		} catch (SQLException e) {
 			Logger.log("[ERROR] " + e.getMessage());
+			// DatabaseManager.getInstance().closeConnection(con);
 		}
 		return allDatas;
 	}

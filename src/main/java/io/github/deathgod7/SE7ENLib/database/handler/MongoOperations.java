@@ -294,7 +294,7 @@ public class MongoOperations implements DatabaseOperations {
 			return false;
 
 		// Define schema rules for the collection
-		List<Column> allCols = table.getColumns();
+		List<Column> allCols = new ArrayList<>(table.getColumns());
 
 		if (!table.getPrimaryKey().getName().equals("_id")) {
 			return false;
@@ -399,8 +399,6 @@ public class MongoOperations implements DatabaseOperations {
 				Logger.log("[ERROR] Table not found.");
 				return false;
 			}
-
-
 
 			MongoCollection<Document> collection = db.getCollection(tablename);
 

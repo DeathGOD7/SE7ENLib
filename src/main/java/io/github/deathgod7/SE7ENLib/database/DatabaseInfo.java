@@ -86,12 +86,14 @@ public class DatabaseInfo {
 	 * Database Info constructor for SQLite database
 	 * @param dbname name of the database file
 	 * @param dbdir path where the database file is located
+	 * @param poolSettings {@link PoolSettings} the pool settings
 	 * @since 1.0
 	 */
-	public DatabaseInfo(String dbname, String dbdir) {
+	public DatabaseInfo(String dbname, String dbdir, PoolSettings poolSettings) {
 		_dbType = DatabaseManager.DatabaseType.SQLite;
 		_dbName = dbname;
 		_dirDB = dbdir;
+		_poolSettings = poolSettings;
 	}
 
 	/**
