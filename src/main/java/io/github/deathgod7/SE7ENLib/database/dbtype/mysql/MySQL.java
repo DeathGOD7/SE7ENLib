@@ -49,20 +49,21 @@ public class MySQL extends SQLOperations {
 		return dbName;
 	}
 
-	private HikariConfig hikariConfig;
 	private HikariDataSource hikariDataSource;
-	private Connection connection;
 	/**
 	 * Get the connection
 	 * @return {@link Connection}
 	 */
 	public Connection getConnection(){
 		try {
-			connection = hikariDataSource.getConnection();
+			Connection connection = hikariDataSource.getConnection();
 
 			if (isConnectionValid(connection)) { return connection; }
-			else { return null; }
-
+			else {
+				Logger.log("[GET CONNECTION || MySQL] Connection invalid. Closing the connection");
+				connection.close();
+				return null;
+			}
 		}
 		catch (SQLException ex) {
 			Logger.log("[GET CON ERROR] " + ex.getMessage());
@@ -91,12 +92,7 @@ public class MySQL extends SQLOperations {
 	 */
 	@Deprecated
 	public boolean isConnected(){
-		try {
-			return connection != null && !connection.isClosed();
-		} catch (SQLException e) {
-			Logger.log("[ERROR] " + e.getMessage());
-			return false;
-		}
+		return false;
 	}
 	private final LinkedHashMap<String, Table> tables = new LinkedHashMap<>();
 	/**
@@ -134,7 +130,11 @@ public class MySQL extends SQLOperations {
 		this.password = password;
 		this.dbName = dbname;
 		this.dbInfo = new DatabaseInfo(dbname, host, username, password, DatabaseType.MySQL, null);
-		this.connection = connectMySQL();
+		if (connectMySQL()) {
+			Logger.log("[OBJECT CREATION INFO] MySQL connected successfully");
+		}else {
+			Logger.log("[OBJECT CREATION INFO] MySQL connection failed");
+		}
 	}
 
 	/**
@@ -147,11 +147,15 @@ public class MySQL extends SQLOperations {
 		this.username = dbInfo.getUsername();
 		this.password = dbInfo.getPassword();
 		this.dbName = dbInfo.getDbName();
-		this.connection = connectMySQL();
+		if (connectMySQL()) {
+			Logger.log("[OBJECT CREATION INFO] MySQL connected successfully");
+		}else {
+			Logger.log("[OBJECT CREATION INFO] MySQL connection failed");
+		}
 	}
 
-	private Connection connectMySQL() {
-		hikariConfig = new HikariConfig();
+	private boolean connectMySQL() {
+		HikariConfig hikariConfig = new HikariConfig();
 		String cleanedUrl = this.host.replaceFirst("^(https?://)?", "");
 
 		hikariConfig.setJdbcUrl("jdbc:mysql://" + cleanedUrl + "/" + this.dbName);
@@ -173,10 +177,10 @@ public class MySQL extends SQLOperations {
 
 		try {
 			hikariDataSource = new HikariDataSource(hikariConfig);
-			return hikariDataSource.getConnection();
-		} catch (SQLException ex) {
+			return true;
+		} catch (Exception ex) {
 			Logger.log("[ERROR] " + ex.getMessage());
-			return null;
+			return false;
 		}
 	}
 

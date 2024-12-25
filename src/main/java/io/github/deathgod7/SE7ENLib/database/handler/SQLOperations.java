@@ -146,7 +146,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 		// end closing
 		query.replace(query.length() - 2, query.length(), ");");
 
-		Logger.log("[QUERY] " + query);
+		Logger.log("[CREATE TABLE QUERY] " + query);
 
 		try {
 			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
@@ -187,7 +187,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 		String safeTableName = this.sanitizeSQLQuery(tablename);
 		StringBuilder query = new StringBuilder("DROP TABLE IF EXISTS `" + safeTableName + "`;");
 
-		Logger.log("[QUERY] " + query);
+		Logger.log("[DROP TABLE QUERY] " + query);
 
 		try {
 			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
@@ -247,7 +247,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 			}
 			query.append(";");
 
-			Logger.log("[QUERY] " + query);
+			Logger.log("[INSERT DATA QUERY] " + query);
 
 			try {
 				Connection con = (Connection) DatabaseManager.getInstance().getConnection();
@@ -366,7 +366,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 		}
 		query.append(";");
 
-		Logger.log("[QUERY] " + query);
+		Logger.log("[UPDATE DATA QUERY] " + query);
 
 		try {
 			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
@@ -396,7 +396,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 		String safeTableName = this.sanitizeSQLQuery(tablename);
 		String query = "DELETE FROM `" + safeTableName + "` WHERE `" + primaryKey.getName() + "` = ?";
 
-		Logger.log("[QUERY] " + query);
+		Logger.log("[DELETE DATA QUERY] " + query);
 
 		try {
 			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
@@ -489,7 +489,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 			query = query.replace("= ?", "LIKE ?");
 		}
 
-		Logger.log("[QUERY] " + query);
+		Logger.log("[GET EXACT DATA QUERY] " + query);
 
 		try {
 			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
@@ -635,7 +635,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 			query = query.replace("= ?", "LIKE ?");
 		}
 
-		Logger.log("[QUERY] " + query);
+		Logger.log("[FIND DATA QUERY] " + query);
 
 		try {
 			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
@@ -770,7 +770,7 @@ public abstract class SQLOperations implements DatabaseOperations {
 		Table table = DatabaseManager.getInstance().getTables().get(tablename);
 		String query = "SELECT * FROM `" + safeTableName + "`;";
 		try {
-			Logger.log("[QUERY] " + query);
+			Logger.log("[GET ALL DATAS QUERY] " + query);
 
 			Connection con = (Connection) DatabaseManager.getInstance().getConnection();
 			PreparedStatement s = con.prepareStatement(query);

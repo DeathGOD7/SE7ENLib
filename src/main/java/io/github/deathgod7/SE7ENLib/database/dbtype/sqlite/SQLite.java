@@ -25,7 +25,6 @@ import java.util.regex.Pattern;
 public class SQLite extends SQLOperations {
 	private final String dbName;
 	private final String dirDB;
-	private Connection connection;
 
 	// old name = sqlite_master ( < 3.33.0 ) // works in all newer version
 	// new name = sqlite_schema ( >= 3.33.0 ) // won't work in older version
@@ -48,7 +47,6 @@ public class SQLite extends SQLOperations {
 		return dbInfo;
 	}
 
-	private HikariConfig hikariConfig;
 	private HikariDataSource hikariDataSource;
 
 	/**
@@ -58,12 +56,7 @@ public class SQLite extends SQLOperations {
 	 */
 	@Deprecated
 	public boolean isConnected(){
-		try {
-			return connection != null && !connection.isClosed();
-		} catch (SQLException e) {
-			Logger.log("[ERROR] " + e.getMessage());
-			return false;
-		}
+		return false;
 	}
 
 	/**
@@ -72,11 +65,14 @@ public class SQLite extends SQLOperations {
 	 */
 	public Connection getConnection(){
 		try {
-			connection = hikariDataSource.getConnection();
+			Connection connection = hikariDataSource.getConnection();
 
 			if (isConnectionValid(connection)) { return connection; }
-			else { return null; }
-
+			else {
+				Logger.log("[GET CONNECTION || SQLITE] Connection invalid. Closing the connection");
+				connection.close();
+				return null;
+			}
 		}
 		catch (SQLException ex) {
 			Logger.log("[GET CON ERROR] " + ex.getMessage());
@@ -134,7 +130,11 @@ public class SQLite extends SQLOperations {
 		this.dbName = dbName;
 		this.dirDB = directory;
 		this.dbInfo = new DatabaseInfo(dbName, directory);
-		this.connection = connectSQLite();
+		if (connectSQLite()) {
+			Logger.log("[OBJECT CREATION INFO] MySQL connected successfully");
+		}else {
+			Logger.log("[OBJECT CREATION INFO] MySQL connection failed");
+		}
 	}
 
 	/**
@@ -145,10 +145,14 @@ public class SQLite extends SQLOperations {
 		this.dbInfo = dbInfo;
 		this.dbName = dbInfo.getDbName();
 		this.dirDB = dbInfo.getDirDb();
-		this.connection = connectSQLite();
+		if (connectSQLite()) {
+			Logger.log("[OBJECT CREATION INFO] MySQL connected successfully");
+		}else {
+			Logger.log("[OBJECT CREATION INFO] MySQL connection failed");
+		}
 	}
 
-	private Connection connectSQLite() {
+	private boolean connectSQLite() {
 		File dbFile = new File(this.dirDB + "/" + dbName + ".db");
 
 		if (!dbFile.exists()) {
@@ -163,7 +167,7 @@ public class SQLite extends SQLOperations {
 			}
 		}
 
-		hikariConfig = new HikariConfig();
+		HikariConfig hikariConfig = new HikariConfig();
 
 		hikariConfig.setJdbcUrl("jdbc:sqlite:" + dbFile);
 		hikariConfig.setUsername("");
@@ -184,10 +188,10 @@ public class SQLite extends SQLOperations {
 
 		try {
 			hikariDataSource = new HikariDataSource(hikariConfig);
-			return hikariDataSource.getConnection();
-		} catch (SQLException ex) {
+			return true;
+		} catch (Exception ex) {
 			Logger.log("[SQLITE ERROR] " + ex.getMessage());
-			return null;
+			return false;
 		}
 	}
 
