@@ -61,7 +61,20 @@ public class DatabaseManager {
 	 * @return {@link Boolean}
 	 */
 	public boolean isConnected() {
-		return (this.getConnection() != null);
+		if (_dbInfo.getDbType() == DatabaseType.SQLite || _dbInfo.getDbType() == DatabaseType.MySQL) {
+			try (Connection con = (Connection) this.getConnection()) {
+				return con != null;
+			} catch (SQLException ex) {
+				Logger.log("[CONNECTION CHECK ERROR] " + ex.getMessage());
+				return false;
+			}
+		}
+		else if (_dbInfo.getDbType() == DatabaseType.MongoDB) {
+			return this.getMongoDB().isConnected();
+		}
+		else {
+			return false;
+		}
 	}
 
 	private boolean debugMode = false;

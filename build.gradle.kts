@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "io.github.deathgod7.SE7ENLib"
-version = "1.1.1"
+version = "1.1.2-rc1"
 description = "A lib to aid in development for my java stuff."
 
 repositories {
