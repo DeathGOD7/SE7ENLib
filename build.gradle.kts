@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "io.github.deathgod7.SE7ENLib"
-version = "1.1.2-rc1"
+version = "1.1.2-SNAPSHOT-1"
 description = "A lib to aid in development for my java stuff."
 
 repositories {
@@ -108,47 +108,117 @@ tasks.withType<JavaCompile> {
     options.compilerArgs.add("-Xlint:unchecked")
 }
 
-extra["isReleaseVersion"] = !(version.toString().endsWith("SNAPSHOT") || version.toString().contains("-rc"))
+extra["isReleaseVersion"] = !(
+		version.toString().contains("SNAPSHOT", ignoreCase = true) ||
+				version.toString().contains("RC", ignoreCase = true)
+		)
 extra["groupID"] = "io.github.deathgod7"
 extra["artifactID"] = "SE7ENLib"
 
+tasks.register("printVersionInfo") {
+	doLast {
+		val isRelease = project.extra["isReleaseVersion"] as Boolean
+		println("Publishing version: $version")
+		println("Is this a release version? $isRelease")
+		println(if (isRelease) "This is a PUBLIC RELEASE." else "This is a SNAPSHOT or RC version.")
+	}
+}
+
+tasks.named("publish") {
+	dependsOn("printVersionInfo")
+}
+
 mavenPublishing {
-	configure(JavaLibrary(
+	if (extra["isReleaseVersion"] as Boolean) {
+		publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+		signAllPublications()
+
+		// Common configuration for both releases and snapshots
+		configure(JavaLibrary(
 			javadocJar = JavadocJar.Javadoc(),
 			sourcesJar = true,
-	))
+		))
 
-	publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
-
-	signAllPublications()
-
-	coordinates(project.extra["groupID"].toString(), project.extra["artifactID"].toString(), project.version.toString())
-
-	pom {
-		name = "SE7ENLib"
-		description = project.description.toString()
-		url = "https://github.com/DeathGOD7/SE7ENLib"
-		properties = mapOf(
-				"release-type" to if (project.extra["isReleaseVersion"] as Boolean) "PUBLIC RELEASE" else "SNAPSHOT RELEASE"
+		coordinates(
+			groupId = extra["groupID"].toString(),
+			artifactId = extra["artifactID"].toString(),
+			version = project.version.toString()
 		)
-		licenses {
-			license {
-				name = "GNU GENERAL PUBLIC LICENSE 3.0"
-				url = "https://www.gnu.org/licenses/gpl-3.0.en.html"
+
+		pom {
+			name.set("SE7ENLib")
+			description.set(project.description)
+			url.set("https://github.com/DeathGOD7/SE7ENLib")
+			properties = mapOf(
+				"release-type" to if (project.extra["isReleaseVersion"] as Boolean) "PUBLIC RELEASE" else "SNAPSHOT RELEASE"
+			)
+			licenses {
+				license {
+					name.set("GNU GENERAL PUBLIC LICENSE 3.0")
+					url.set("https://www.gnu.org/licenses/gpl-3.0.en.html")
+				}
 			}
-		}
-		developers {
-			developer {
-				id = "deathgod7"
-				name = "Death GOD 7"
-				email = "laxneshlovecfc@gmail.com"
+			developers {
+				developer {
+					id.set("deathgod7")
+					name.set("Death GOD 7")
+					email.set("seven@sthalokendra.com.np")
+				}
 			}
-		}
-		scm {
-			url = "https://github.com/DeathGOD7/SE7ENLib.git"
+			scm {
+				url.set("https://github.com/DeathGOD7/SE7ENLib.git")
+			}
 		}
 	}
+}
 
+publishing {
+	if (!(extra["isReleaseVersion"] as Boolean)) {
+		repositories {
+			maven {
+				name = "SE7ENRepository"
+				url = uri("https://repo.sthalokendra.com.np/snapshots")
+				credentials(PasswordCredentials::class)
+				authentication {
+					create<BasicAuthentication>("basic")
+				}
+			}
+		}
+
+		publications {
+			create<MavenPublication>("SE7ENRepositorySnapshot") {
+				from(components["java"])
+				groupId = extra["groupID"].toString()
+				artifactId = extra["artifactID"].toString()
+				version = project.version.toString()
+
+				pom {
+					name.set("SE7ENLib")
+					description.set(project.description)
+					url.set("https://github.com/DeathGOD7/SE7ENLib")
+					properties = mapOf(
+						"release-type" to if (project.extra["isReleaseVersion"] as Boolean) "PUBLIC RELEASE" else "SNAPSHOT RELEASE"
+					)
+					licenses {
+						license {
+							name.set("GNU GENERAL PUBLIC LICENSE 3.0")
+							url.set("https://www.gnu.org/licenses/gpl-3.0.en.html")
+						}
+					}
+					developers {
+						developer {
+							id.set("deathgod7")
+							name.set("Death GOD 7")
+							email.set("seven@sthalokendra.com.np")
+						}
+					}
+					scm {
+						url.set("https://github.com/DeathGOD7/SE7ENLib.git")
+					}
+				}
+			}
+		}
+	}
 }
 
 signing {

@@ -257,8 +257,7 @@ public class SQLite extends SQLOperations {
 		LinkedHashMap<String, Column> columns = new LinkedHashMap<>();
 		String primarykey = "";
 
-		try {
-			Connection con = this.getConnection();
+		try (Connection con = this.getConnection()) {
 			PreparedStatement ps = con.prepareStatement(query);
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
