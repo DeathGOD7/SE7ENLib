@@ -11,7 +11,7 @@ plugins {
 	id("com.vanniktech.maven.publish") version "0.28.0"
 }
 
-group = "io.github.deathgod7.SE7ENLib"
+group = "io.github.deathgod7"
 version = "1.1.2-SNAPSHOT-1"
 description = "A lib to aid in development for my java stuff."
 
@@ -76,7 +76,6 @@ tasks.withType<ShadowJar> {
     archiveFileName.set("${project.name}-${project.version}-all.jar")
 
     relocate ("com.zaxxer", "io.github.deathgod7")
-    //relocate ("mysql", "io.github.deathgod7")
     relocate ("org.mongodb", "io.github.deathgod7")
 }
 
