@@ -184,39 +184,14 @@ publishing {
 		}
 	}
 
-	publications {
-		create<MavenPublication>("SE7ENRepositoryPublication") {
-			from(components["java"])
-			groupId = extra["groupID"].toString()
-			artifactId = extra["artifactID"].toString()
-			version = project.version.toString()
+	// Do NOT create a separate publication with the same coordinates as the
+	// plugin-created 'maven' publication. The com.vanniktech.maven.publish
+	// plugin always registers a publication called 'maven'.
+	//
+	// Only needs the repository configured here. Publishing to any
+	// repo should reuse the existing 'maven' publication that the plugin
+	// produced.
 
-			pom {
-				name.set("SE7ENLib")
-				description.set(project.description)
-				url.set("https://github.com/DeathGOD7/SE7ENLib")
-				properties = mapOf(
-					"release-type" to if (project.extra["isReleaseVersion"] as Boolean) "PUBLIC RELEASE" else "SNAPSHOT RELEASE"
-				)
-				licenses {
-					license {
-						name.set("GNU GENERAL PUBLIC LICENSE 3.0")
-						url.set("https://www.gnu.org/licenses/gpl-3.0.en.html")
-					}
-				}
-				developers {
-					developer {
-						id.set("deathgod7")
-						name.set("Death GOD 7")
-						email.set("seven@deathgod7.qzz.io")
-					}
-				}
-				scm {
-					url.set("https://github.com/DeathGOD7/SE7ENLib.git")
-				}
-			}
-		}
-	}
 }
 
 signing {
