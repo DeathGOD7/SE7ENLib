@@ -132,42 +132,42 @@ mavenPublishing {
 	if (extra["isReleaseVersion"] as Boolean) {
 		publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
 		signAllPublications()
+	}
 
-		// Common configuration for both releases and snapshots
-		configure(JavaLibrary(
-			javadocJar = JavadocJar.Javadoc(),
-			sourcesJar = true,
-		))
+	// Shared publication configuration for both release and snapshot builds.
+	configure(JavaLibrary(
+		javadocJar = JavadocJar.Javadoc(),
+		sourcesJar = true,
+	))
 
-		coordinates(
-			groupId = extra["groupID"].toString(),
-			artifactId = extra["artifactID"].toString(),
-			version = project.version.toString()
+	coordinates(
+		groupId = extra["groupID"].toString(),
+		artifactId = extra["artifactID"].toString(),
+		version = project.version.toString()
+	)
+
+	pom {
+		name.set("SE7ENLib")
+		description.set(project.description)
+		url.set("https://github.com/DeathGOD7/SE7ENLib")
+		properties = mapOf(
+			"release-type" to if (project.extra["isReleaseVersion"] as Boolean) "PUBLIC RELEASE" else "SNAPSHOT RELEASE"
 		)
-
-		pom {
-			name.set("SE7ENLib")
-			description.set(project.description)
-			url.set("https://github.com/DeathGOD7/SE7ENLib")
-			properties = mapOf(
-				"release-type" to if (project.extra["isReleaseVersion"] as Boolean) "PUBLIC RELEASE" else "SNAPSHOT RELEASE"
-			)
-			licenses {
-				license {
-					name.set("GNU GENERAL PUBLIC LICENSE 3.0")
-					url.set("https://www.gnu.org/licenses/gpl-3.0.en.html")
-				}
+		licenses {
+			license {
+				name.set("GNU GENERAL PUBLIC LICENSE 3.0")
+				url.set("https://www.gnu.org/licenses/gpl-3.0.en.html")
 			}
-			developers {
-				developer {
-					id.set("deathgod7")
-					name.set("Death GOD 7")
-					email.set("seven@deathgod7.qzz.io")
-				}
+		}
+		developers {
+			developer {
+				id.set("deathgod7")
+				name.set("Death GOD 7")
+				email.set("seven@deathgod7.qzz.io")
 			}
-			scm {
-				url.set("https://github.com/DeathGOD7/SE7ENLib.git")
-			}
+		}
+		scm {
+			url.set("https://github.com/DeathGOD7/SE7ENLib.git")
 		}
 	}
 }
