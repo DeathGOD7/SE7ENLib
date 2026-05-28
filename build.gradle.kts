@@ -12,7 +12,8 @@ plugins {
 }
 
 group = "io.github.deathgod7"
-version = "1.1.2-SNAPSHOT-1"
+//version = "1.2.0"
+version = "1.2.0-SNAPSHOT-1"
 description = "A lib to aid in development for my java stuff."
 
 repositories {
@@ -161,7 +162,7 @@ mavenPublishing {
 				developer {
 					id.set("deathgod7")
 					name.set("Death GOD 7")
-					email.set("seven@sthalokendra.com.np")
+					email.set("seven@deathgod7.qzz.io")
 				}
 			}
 			scm {
@@ -172,48 +173,46 @@ mavenPublishing {
 }
 
 publishing {
-	if (!(extra["isReleaseVersion"] as Boolean)) {
-		repositories {
-			maven {
-				name = "SE7ENRepository"
-				url = uri("https://repo.sthalokendra.com.np/snapshots")
-				credentials(PasswordCredentials::class)
-				authentication {
-					create<BasicAuthentication>("basic")
-				}
+	repositories {
+		maven {
+			name = "SE7ENRepository"
+			url = uri(if (extra["isReleaseVersion"] as Boolean) "https://repo.deathgod7.qzz.io/releases" else "https://repo.deathgod7.qzz.io/snapshots")
+			credentials(PasswordCredentials::class)
+			authentication {
+				create<BasicAuthentication>("basic")
 			}
 		}
+	}
 
-		publications {
-			create<MavenPublication>("SE7ENRepositorySnapshot") {
-				from(components["java"])
-				groupId = extra["groupID"].toString()
-				artifactId = extra["artifactID"].toString()
-				version = project.version.toString()
+	publications {
+		create<MavenPublication>("SE7ENRepositoryPublication") {
+			from(components["java"])
+			groupId = extra["groupID"].toString()
+			artifactId = extra["artifactID"].toString()
+			version = project.version.toString()
 
-				pom {
-					name.set("SE7ENLib")
-					description.set(project.description)
-					url.set("https://github.com/DeathGOD7/SE7ENLib")
-					properties = mapOf(
-						"release-type" to if (project.extra["isReleaseVersion"] as Boolean) "PUBLIC RELEASE" else "SNAPSHOT RELEASE"
-					)
-					licenses {
-						license {
-							name.set("GNU GENERAL PUBLIC LICENSE 3.0")
-							url.set("https://www.gnu.org/licenses/gpl-3.0.en.html")
-						}
+			pom {
+				name.set("SE7ENLib")
+				description.set(project.description)
+				url.set("https://github.com/DeathGOD7/SE7ENLib")
+				properties = mapOf(
+					"release-type" to if (project.extra["isReleaseVersion"] as Boolean) "PUBLIC RELEASE" else "SNAPSHOT RELEASE"
+				)
+				licenses {
+					license {
+						name.set("GNU GENERAL PUBLIC LICENSE 3.0")
+						url.set("https://www.gnu.org/licenses/gpl-3.0.en.html")
 					}
-					developers {
-						developer {
-							id.set("deathgod7")
-							name.set("Death GOD 7")
-							email.set("seven@sthalokendra.com.np")
-						}
+				}
+				developers {
+					developer {
+						id.set("deathgod7")
+						name.set("Death GOD 7")
+						email.set("seven@deathgod7.qzz.io")
 					}
-					scm {
-						url.set("https://github.com/DeathGOD7/SE7ENLib.git")
-					}
+				}
+				scm {
+					url.set("https://github.com/DeathGOD7/SE7ENLib.git")
 				}
 			}
 		}
